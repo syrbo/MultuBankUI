@@ -26,7 +26,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
                 behavior: 'smooth'
             });
         }
-    }));
+    });
 });
 
 // Обработка кнопки выхода
@@ -50,12 +50,106 @@ document.querySelectorAll('.text-button').forEach(button => {
         e.preventDefault();
         const text = button.textContent.trim();
         if (text.includes('Открыть счет')) {
-            alert('Функция открытия счета');
+            const modal = document.getElementById('openAccountModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         } else if (text.includes('Открыть продукт')) {
-            alert('Функция открытия продукта');
+            const modal = document.getElementById('openProductModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
     });
 });
+
+// Закрытие модального окна открытия счета
+const closeAccountModal = document.getElementById('closeAccountModal');
+const accountModal = document.getElementById('openAccountModal');
+if (closeAccountModal && accountModal) {
+    closeAccountModal.addEventListener('click', () => {
+        accountModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    // Закрытие при клике вне модального окна
+    accountModal.addEventListener('click', (e) => {
+        if (e.target === accountModal) {
+            accountModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Закрытие модального окна открытия продукта
+const closeProductModal = document.getElementById('closeProductModal');
+const productModal = document.getElementById('openProductModal');
+if (closeProductModal && productModal) {
+    closeProductModal.addEventListener('click', () => {
+        productModal.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    // Закрытие при клике вне модального окна
+    productModal.addEventListener('click', (e) => {
+        if (e.target === productModal) {
+            productModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Обработка формы открытия счета
+const accountForm = document.getElementById('accountForm');
+if (accountForm) {
+    accountForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const accountType = document.getElementById('accountType').value;
+        const initialBalance = document.getElementById('initialBalance').value;
+
+        // Визуальная обратная связь
+        const button = accountForm.querySelector('.modal-button');
+        const originalText = button.textContent;
+        button.textContent = 'Создание...';
+        button.disabled = true;
+
+        // Здесь должна быть логика создания счета
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+            alert(`Счет "${accountType}" успешно создан`);
+            accountModal.style.display = 'none';
+            document.body.style.overflow = '';
+            accountForm.reset();
+            document.getElementById('initialBalance').value = '0';
+        }, 1500);
+    });
+}
+
+// Обработка формы открытия продукта
+const productForm = document.getElementById('productForm');
+if (productForm) {
+    productForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const productType = document.getElementById('productType').value;
+        const productAmount = document.getElementById('productAmount').value;
+
+        // Визуальная обратная связь
+        const button = productForm.querySelector('.modal-button');
+        const originalText = button.textContent;
+        button.textContent = 'Создание...';
+        button.disabled = true;
+
+        // Здесь должна быть логика создания продукта
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+            alert(`Продукт "${productType}" успешно создан`);
+            productModal.style.display = 'none';
+            document.body.style.overflow = '';
+            productForm.reset();
+            document.getElementById('productAmount').value = '0';
+        }, 1500);
+    });
+}
 
 // Обработка формы переводов
 const transferForm = document.querySelector('.transfer-form');

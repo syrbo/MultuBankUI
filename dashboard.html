@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
 </head>
+
 <body>
     <div class="dashboard">
         <!-- Боковая панель -->
@@ -167,7 +169,8 @@
                             <div class="transfer-inputs">
                                 <div class="input-group-transfer">
                                     <label for="fromAccount" class="input-label">Откуда</label>
-                                    <input type="text" id="fromAccount" class="transfer-input" placeholder="Номер счета">
+                                    <input type="text" id="fromAccount" class="transfer-input"
+                                        placeholder="Номер счета">
                                 </div>
                                 <div class="input-group-transfer">
                                     <label for="toAccount" class="input-label">Куда</label>
@@ -175,7 +178,8 @@
                                 </div>
                                 <div class="input-group-transfer">
                                     <label for="amount" class="input-label">Сумма (Р)</label>
-                                    <input type="number" id="amount" class="transfer-input" value="1000" min="0" step="0.01">
+                                    <input type="number" id="amount" class="transfer-input" value="1000" min="0"
+                                        step="0.01">
                                 </div>
                             </div>
                             <button type="submit" class="transfer-button">Перевести</button>
@@ -312,6 +316,63 @@
         </main>
     </div>
 
+    <!-- Модальное окно открытия счета -->
+    <div class="modal-overlay" id="openAccountModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Открыть новый счет</h3>
+                <button class="modal-close" id="closeAccountModal">×</button>
+            </div>
+            <form class="modal-form" id="accountForm">
+                <div class="modal-input-group">
+                    <label for="accountType" class="modal-label">Тип счета</label>
+                    <select id="accountType" class="modal-select" required>
+                        <option value="current">Текущий счет</option>
+                        <option value="savings">Сберегательный счет</option>
+                        <option value="deposit">Депозитный счет</option>
+                    </select>
+                </div>
+                <div class="modal-input-group">
+                    <label for="initialBalance" class="modal-label">Начальный баланс</label>
+                    <input type="number" id="initialBalance" class="modal-input" value="0" min="0" step="0.01" required>
+                </div>
+                <div class="modal-info">
+                    Новые счета создаются с балансом 0 Р. Пополните счет после создания.
+                </div>
+                <button type="submit" class="modal-button">Открыть счет</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно открытия продукта -->
+    <div class="modal-overlay" id="openProductModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Открыть новый продукт</h3>
+                <button class="modal-close" id="closeProductModal">×</button>
+            </div>
+            <form class="modal-form" id="productForm">
+                <div class="modal-input-group">
+                    <label for="productType" class="modal-label">Тип продукта</label>
+                    <select id="productType" class="modal-select" required>
+                        <option value="credit">Кредит</option>
+                        <option value="deposit">Депозит</option>
+                        <option value="insurance">Страхование</option>
+                    </select>
+                </div>
+                <div class="modal-input-group">
+                    <label for="productAmount" class="modal-label">Сумма</label>
+                    <input type="number" id="productAmount" class="modal-input" value="0" min="0" step="0.01" required>
+                </div>
+                <div class="modal-info">
+                    Выберите тип продукта и укажите сумму для создания нового продукта.
+                </div>
+                <button type="submit" class="modal-button">Открыть продукт</button>
+            </form>
+        </div>
+    </div>
+
     <script src="dashboard.js"></script>
 </body>
+
 </html>
