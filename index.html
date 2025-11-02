@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мультибанк - Вход</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card" id="loginCard">
+            <div class="card-header">
+                <h1 class="title">Вход</h1>
+                <p class="subtitle">Добро пожаловать в Мультибанк</p>
+            </div>
+
+            <form class="form" id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="loginEmail" class="input" placeholder=" " required>
+                    <label for="loginEmail" class="label">Телефон или Email</label>
+                    <div class="input-underline"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="loginPassword" class="input" placeholder=" " required>
+                    <label for="loginPassword" class="label">Пароль</label>
+                    <div class="input-underline"></div>
+                    <button type="button" class="password-toggle" id="loginPasswordToggle">
+                        <span class="eye-icon">👁</span>
+                    </button>
+                </div>
+
+                <div class="form-footer">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="rememberMe">
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">Запомнить меня</span>
+                    </label>
+                    <a href="#" class="link">Забыли пароль?</a>
+                </div>
+
+                <button type="submit" class="button button-primary">
+                    <span class="button-text">Войти</span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>или</span>
+            </div>
+
+            <button class="button button-secondary" id="switchToRegister">
+                <span class="button-text">Создать аккаунт</span>
+            </button>
+        </div>
+
+        <div class="card" id="registerCard" style="display: none;">
+            <div class="card-header">
+                <h1 class="title">Регистрация</h1>
+                <p class="subtitle">Создайте новый аккаунт</p>
+            </div>
+
+            <form class="form" id="registerForm">
+                <div class="input-group">
+                    <input type="text" id="registerName" class="input" placeholder=" " required>
+                    <label for="registerName" class="label">Имя</label>
+                    <div class="input-underline"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="registerPhone" class="input" placeholder=" " required>
+                    <label for="registerPhone" class="label">Телефон</label>
+                    <div class="input-underline"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="registerEmail" class="input" placeholder=" " required>
+                    <label for="registerEmail" class="label">Email</label>
+                    <div class="input-underline"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="registerPassword" class="input" placeholder=" " required>
+                    <label for="registerPassword" class="label">Пароль</label>
+                    <div class="input-underline"></div>
+                    <button type="button" class="password-toggle" id="registerPasswordToggle">
+                        <span class="eye-icon">👁</span>
+                    </button>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="registerPasswordConfirm" class="input" placeholder=" " required>
+                    <label for="registerPasswordConfirm" class="label">Подтвердите пароль</label>
+                    <div class="input-underline"></div>
+                    <button type="button" class="password-toggle" id="registerPasswordConfirmToggle">
+                        <span class="eye-icon">👁</span>
+                    </button>
+                </div>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" id="agreeTerms" required>
+                    <span class="checkmark"></span>
+                    <span class="checkbox-label">Я согласен с <a href="#" class="link-inline">условиями использования</a></span>
+                </label>
+
+                <button type="submit" class="button button-primary">
+                    <span class="button-text">Зарегистрироваться</span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>или</span>
+            </div>
+
+            <button class="button button-secondary" id="switchToLogin">
+                <span class="button-text">Уже есть аккаунт? Войти</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
