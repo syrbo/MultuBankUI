@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мультибанк - Главная</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Боковая панель -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>Мультибанк</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="home">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Главная</span>
+                </a>
+                <a href="#" class="nav-item" data-section="accounts">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-text">Мои счета</span>
+                </a>
+                <a href="#" class="nav-item" data-section="products">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Продукты</span>
+                </a>
+                <a href="#" class="nav-item" data-section="transfers">
+                    <span class="nav-icon">💸</span>
+                    <span class="nav-text">Переводы</span>
+                </a>
+                <a href="#" class="nav-item" data-section="history">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">История</span>
+                </a>
+                <a href="#" class="nav-item" data-section="consents">
+                    <span class="nav-icon">🔒</span>
+                    <span class="nav-text">Согласия</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <header class="top-header">
+                <div class="header-user">
+                    <div class="user-avatar">—</div>
+                    <span class="user-name">demo-054</span>
+                    <button class="icon-button" title="Темная тема">🌙</button>
+                    <button class="icon-button" title="Выход">🚪</button>
+                    <button class="icon-button" title="Настройки">▲</button>
+                </div>
+            </header>
+
+            <!-- Контент -->
+            <div class="content-area">
+                <!-- Главная страница -->
+                <div class="content-section" id="home-section">
+                    <!-- Карточки суммарной информации -->
+                    <div class="summary-cards">
+                        <div class="summary-card balance-card">
+                            <div class="summary-value">574 182,4 Р</div>
+                            <div class="summary-label">Общий баланс</div>
+                            <div class="summary-sublabel">Во всех счетах</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value">2</div>
+                            <div class="summary-label">Мои счета</div>
+                            <div class="summary-sublabel">Активных</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value">0</div>
+                            <div class="summary-label">Продукты</div>
+                            <div class="summary-sublabel">Активных договоров</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-value">—</div>
+                            <div class="summary-label">Переводы</div>
+                            <div class="summary-sublabel">За месяц</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Мои счета -->
+                <div class="content-section" id="accounts-section">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <span class="section-icon">💳</span>
+                                Мои счета
+                            </h3>
+                            <button class="text-button">
+                                <span>+</span> Открыть счет
+                            </button>
+                        </div>
+                        <div class="accounts-grid">
+                            <div class="account-card">
+                                <div class="account-header">
+                                    <h4 class="account-title">Checking</h4>
+                                    <button class="close-button">Закрыть</button>
+                                </div>
+                                <div class="account-number">40817810099910000054</div>
+                                <div class="account-balance">574 182,4 Р</div>
+                                <div class="account-operations">
+                                    <div class="operations-title">Последние операции</div>
+                                    <div class="operation-item negative">
+                                        <span class="operation-name">Аренда</span>
+                                        <span class="operation-amount">42981.60 Р</span>
+                                    </div>
+                                    <div class="operation-item negative">
+                                        <span class="operation-name">Продукты</span>
+                                        <span class="operation-amount">3351.92 Р</span>
+                                    </div>
+                                    <div class="operation-item positive">
+                                        <span class="operation-name">Зарплата</span>
+                                        <span class="operation-amount">+78398.26 Р</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-card">
+                                <div class="account-header">
+                                    <h4 class="account-title">Savings</h4>
+                                    <button class="close-button">Закрыть</button>
+                                </div>
+                                <div class="account-number">423011cdeabf4f2fe4a9</div>
+                                <div class="account-balance">0 Р</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Мои продукты -->
+                <div class="content-section" id="products-section">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <span class="section-icon">📦</span>
+                                Мои продукты
+                            </h3>
+                            <button class="text-button">
+                                <span>+</span> Открыть продукт
+                            </button>
+                        </div>
+                        <div class="products-card">
+                            <div class="empty-state">
+                                <span class="empty-icon">📦</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Переводы -->
+                <div class="content-section" id="transfers-section">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <span class="section-icon">💸</span>
+                                Переводы
+                            </h3>
+                        </div>
+                        <form class="transfer-form">
+                            <div class="transfer-inputs">
+                                <div class="input-group-transfer">
+                                    <label for="fromAccount" class="input-label">Откуда</label>
+                                    <input type="text" id="fromAccount" class="transfer-input" placeholder="Номер счета">
+                                </div>
+                                <div class="input-group-transfer">
+                                    <label for="toAccount" class="input-label">Куда</label>
+                                    <input type="text" id="toAccount" class="transfer-input" placeholder="Номер счета">
+                                </div>
+                                <div class="input-group-transfer">
+                                    <label for="amount" class="input-label">Сумма (Р)</label>
+                                    <input type="number" id="amount" class="transfer-input" value="1000" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <button type="submit" class="transfer-button">Перевести</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- История операций -->
+                <div class="content-section" id="history-section">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <span class="section-icon">📊</span>
+                                История операций
+                            </h3>
+                        </div>
+                        <div class="history-filters">
+                            <select class="filter-select">
+                                <option>Все счета</option>
+                                <option>Checking</option>
+                                <option>Savings</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>Все</option>
+                                <option>Доходы</option>
+                                <option>Расходы</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>Все время</option>
+                                <option>Сегодня</option>
+                                <option>Неделя</option>
+                                <option>Месяц</option>
+                            </select>
+                        </div>
+                        <div class="history-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Описание</th>
+                                        <th>Счет</th>
+                                        <th>Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="date-cell">
+                                                <span class="date">22.09.2025</span>
+                                                <span class="time">06:18</span>
+                                            </div>
+                                        </td>
+                                        <td>Налоги</td>
+                                        <td>
+                                            <div class="account-cell">
+                                                <span class="account-name">Checking</span>
+                                                <span class="account-number-short">407028100999...</span>
+                                            </div>
+                                        </td>
+                                        <td class="amount-negative">-141 218,7 Р</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="date-cell">
+                                                <span class="date">21.09.2025</span>
+                                                <span class="time">14:32</span>
+                                            </div>
+                                        </td>
+                                        <td>Аренда</td>
+                                        <td>
+                                            <div class="account-cell">
+                                                <span class="account-name">Checking</span>
+                                                <span class="account-number-short">407028100999...</span>
+                                            </div>
+                                        </td>
+                                        <td class="amount-negative">-153 634,65 Р</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="date-cell">
+                                                <span class="date">20.09.2025</span>
+                                                <span class="time">09:15</span>
+                                            </div>
+                                        </td>
+                                        <td>Зарплата</td>
+                                        <td>
+                                            <div class="account-cell">
+                                                <span class="account-name">Checking</span>
+                                                <span class="account-number-short">407028100999...</span>
+                                            </div>
+                                        </td>
+                                        <td class="amount-positive">+78 398,26 Р</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="date-cell">
+                                                <span class="date">19.09.2025</span>
+                                                <span class="time">16:45</span>
+                                            </div>
+                                        </td>
+                                        <td>Продукты</td>
+                                        <td>
+                                            <div class="account-cell">
+                                                <span class="account-name">Checking</span>
+                                                <span class="account-number-short">407028100999...</span>
+                                            </div>
+                                        </td>
+                                        <td class="amount-negative">-3 351,92 Р</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Согласия -->
+                <div class="content-section" id="consents-section">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <span class="section-icon">🔒</span>
+                                Согласия
+                            </h3>
+                        </div>
+                        <div class="products-card">
+                            <div class="empty-state">
+                                <span class="empty-icon">🔒</span>
+                                <p style="margin-top: 16px; color: var(--on-surface-variant);">Нет активных согласий</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

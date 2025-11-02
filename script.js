@@ -42,7 +42,8 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
     setTimeout(() => {
         button.querySelector('.button-text').textContent = originalText;
         button.disabled = false;
-        alert('Форма авторизации отправлена');
+        // Переход на главную страницу после авторизации
+        window.location.href = 'dashboard.html';
     }, 1500);
 });
 
