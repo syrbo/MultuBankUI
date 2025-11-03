@@ -8,6 +8,12 @@ let ABANK_CONSENT_ID = ""
 let SBANK_CONSENT_ID = ""
 let USERNAME = ""
 
+let ACCOUNTS = {
+    "vbank": {total_balance: 0, accounts: []},
+    "abank": {total_balance: 0, accounts: []},
+    "sbank": {total_balance: 0, accounts: []}
+}
+
 async function doHTTP(url, headers = {}, body = null, params = {}) {
     const hasParams = params && Object.keys(params).length > 0
     if (hasParams) {

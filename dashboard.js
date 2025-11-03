@@ -247,6 +247,25 @@ window.onload = async function() {
     ABANK_CONSENT_ID = localStorage.getItem("aconsent")
     let vaccounts = await doHTTP(VBANK+"accounts", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID}, null, {"client_id": USERNAME})
     let aaccounts = await doHTTP(ABANK+"accounts", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID}, null, {"client_id": USERNAME})
-    console.log(vaccounts)
-
+    if (!("detail" in vaccounts)) {
+        vaccounts = vaccounts["data"]["account"]
+        vaccounts.forEach(async (acc) => {
+            let balance = await doHTTP(VBANK+"accounts/"+acc["accountId"]+"/balances", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID}, null, {"client_id": USERNAME})//["data"]["balance"][0]["amount"]["amount"]
+            balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
+            ACCOUNTS['vbank']['total_balance'] += balance
+            ACCOUNTS['vbank']["accounts"].push({acc: acc['accountId'], balance: balance})
+        })
+    }
+    if (!("detail" in aaccounts)) {
+        aaccounts = aaccounts["data"]["account"]
+        aaccounts.forEach(async (acc) => {
+            let balance = await doHTTP(ABANK+"accounts/"+acc["accountId"]+"/balances", {"Authorization": ATOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID}, null, {"client_id": USERNAME})//["data"]["balance"][0]["amount"]["amount"]
+            balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
+            ACCOUNTS['abank']['total_balance'] += balance
+            ACCOUNTS['abank']["accounts"].push({acc: acc['accountId'], balance: balance})
+        })
+    }
+    console.log(ACCOUNTS)
+    console.log(ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance'])
+    document.getElementById("totalBalance").textContent = (ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance'])
 }
