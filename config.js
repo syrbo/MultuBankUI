@@ -1,6 +1,12 @@
-const BASE_URL = "https://vbank.open.bankingapi.ru/"
-let TOKEN = ""
-let CONSENT_ID = ""
+const VBANK = "https://vbank.open.bankingapi.ru/"
+const ABANK = "https://abank.open.bankingapi.ru/"
+let VTOKEN = ""
+let ATOKEN = ""
+let STOKEN = ""
+let VBANK_CONSENT_ID = ""
+let ABANK_CONSENT_ID = ""
+let SBANK_CONSENT_ID = ""
+let USERNAME = ""
 
 async function doHTTP(url, headers = {}, body = null, params = {}) {
     const hasParams = params && Object.keys(params).length > 0
@@ -11,7 +17,7 @@ async function doHTTP(url, headers = {}, body = null, params = {}) {
 
     // IMPORTANT: Do not send Access-Control-* headers from the browser.
     // These are response headers that must come from the server.
-    const sanitizedHeaders = {}
+    const sanitizedHeaders = {"Content-Type": "application/json"}
     for (const key in headers) {
         const lower = key.toLowerCase()
         if (lower.startsWith("access-control-")) continue
@@ -34,7 +40,8 @@ async function doHTTP(url, headers = {}, body = null, params = {}) {
     if (!response.ok) {
         // Try to extract error body to aid debugging
         const errorBody = await response.text().catch(() => "")
-        throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorBody}`)
+        // throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorBody}`)
+        return JSON.parse(errorBody);
     }
     if (contentType.includes("application/json")) {
         return await response.json()

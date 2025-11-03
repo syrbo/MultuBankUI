@@ -36,6 +36,8 @@ document.querySelectorAll('.icon-button').forEach(button => {
         if (icon === '🚪') {
             if (confirm('Вы действительно хотите выйти?')) {
                 window.location.href = 'index.html';
+                localStorage.removeItem("uname")
+                localStorage.removeItem("password")
             }
         } else if (icon === '🌙') {
             // Переключение темы (можно добавить позже)
@@ -194,3 +196,57 @@ document.querySelectorAll('.close-button').forEach(button => {
         }
     });
 });
+
+async function auth(uname, passw) {
+    let vauth = await doHTTP(VBANK+"auth/bank-token", {}, {}, {"client_id": "team211", "client_secret": passw})
+    let aauth = await doHTTP(ABANK+"auth/bank-token", {}, {}, {"client_id": "team211", "client_secret": passw})
+    if ("access_token" in vauth && "access_token" in aauth) {
+        VTOKEN = "Bearer " + vauth["access_token"]
+        ATOKEN = "Bearer " + aauth["access_token"]
+        let vconsent = localStorage.getItem("vconsent")
+        let aconsent = localStorage.getItem("aconsent")
+        if (vconsent == null || aconsent == null) {
+            await getConsent(uname, passw)
+        } else {
+            VBANK_CONSENT_ID = vconsent
+            ABANK_CONSENT_ID = aconsent
+            USERNAME = uname
+            localStorage.setItem("uname", uname)
+            localStorage.setItem("password", passw)
+        }
+    }
+    else
+        return window.location.href = "/index.html"
+}
+
+async function getConsent(uname, passw) {
+    let vconsent = await doHTTP(VBANK+"account-consents/request", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211"}, {"client_id": uname, "permissions": ["ReadAccountsDetail", "ReadBalances", "ReadTransactionsDetail"], "reason": "", "requesting_bank": "team211", "requesting_bank_name": "team211"}, {})
+    let aconsent = await doHTTP(ABANK+"account-consents/request", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211"}, {"client_id": uname, "permissions": ["ReadAccountsDetail", "ReadBalances", "ReadTransactionsDetail"], "reason": "...", "requesting_bank": "team211", "requesting_bank_name": "Team 211 App"}, {})
+    if ("detail" in vconsent && "detail" in aconsent) {
+        return window.location.href = "/index.html"
+    }
+    VBANK_CONSENT_ID = vconsent["consent_id"]
+    ABANK_CONSENT_ID = aconsent["consent_id"]
+    USERNAME = uname
+    localStorage.setItem("vconsent", VBANK_CONSENT_ID)
+    localStorage.setItem("aconsent", ABANK_CONSENT_ID)
+    localStorage.setItem("uname", uname)
+    localStorage.setItem("password", passw)
+    window.location.href = "/dashboard.html"
+}
+
+window.onload = async function() {
+    if (localStorage.getItem("uname") == null || localStorage.getItem("password") == null) {
+        return window.location.href = "/index.html"
+    }
+    if (VTOKEN in [null, undefined] || ATOKEN in [null, undefined]) {
+        await auth(localStorage.getItem("uname"), localStorage.getItem("password"))
+    }
+    USERNAME = localStorage.getItem("uname")
+    VBANK_CONSENT_ID = localStorage.getItem("vconsent")
+    ABANK_CONSENT_ID = localStorage.getItem("aconsent")
+    let vaccounts = await doHTTP(VBANK+"accounts", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID}, null, {"client_id": USERNAME})
+    let aaccounts = await doHTTP(ABANK+"accounts", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID}, null, {"client_id": USERNAME})
+    console.log(vaccounts)
+
+}
