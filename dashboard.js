@@ -260,8 +260,8 @@ window.onload = async function () {
         const vbankPromises = vaccounts.map(async (acc) => {
             let balance = await doHTTP(VBANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
             balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
-            
-            
+
+
             ACCOUNTS['vbank']['total_balance'] += balance
             ACCOUNTS['vbank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'] })
         })
@@ -335,7 +335,7 @@ function renderAccounts() {
         const accountDiv = document.createElement('div')
         accountDiv.className = 'account-item'
         // Форматируем номер счета с пробелами
-        const formattedAccountId = account.accId.toString()//.replace(/(\d{4})(?=\d)/g, '$1 ')
+        const displayAccountNumber = (account.accId || account.acc || '').toString()
         accountDiv.innerHTML = `
             <div class="account-header">
                 <div class="account-bank">${account.bank}</div>
@@ -343,7 +343,15 @@ function renderAccounts() {
             </div>
             <div class="account-info">
                 <div class="account-id-label">Номер счета</div>
-                <div class="account-id">${formattedAccountId}</div>
+                <div class="account-id-wrapper">
+                    <div class="account-id">${displayAccountNumber}</div>
+                    <button class="copy-account-btn" data-account="${displayAccountNumber}" title="Скопировать номер счета">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.6667 10.6667H13.3333C13.7015 10.6667 14 10.3682 14 10V3.33333C14 2.96515 13.7015 2.66667 13.3333 2.66667H6.66667C6.29848 2.66667 6 2.96515 6 3.33333V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 6H4C3.44772 6 3 6.44772 3 7V13C3 13.5523 3.44772 14 4 14H10C10.5523 14 11 13.5523 11 13V7C11 6.44772 10.5523 6 10 6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
                 <div class="account-balance-label">Баланс</div>
                 <div class="account-balance">${account.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Р</div>
             </div>
@@ -363,7 +371,15 @@ function renderAccounts() {
             </div>
             <div class="account-info">
                 <div class="account-id-label">Номер счета</div>
-                <div class="account-id">4081 7810 0999 1000 4321</div>
+                <div class="account-id-wrapper">
+                    <div class="account-id">40817810099910004321</div>
+                    <button class="copy-account-btn" data-account="40817810099910004321" title="Скопировать номер счета">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.6667 10.6667H13.3333C13.7015 10.6667 14 10.3682 14 10V3.33333C14 2.96515 13.7015 2.66667 13.3333 2.66667H6.66667C6.29848 2.66667 6 2.96515 6 3.33333V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 6H4C3.44772 6 3 6.44772 3 7V13C3 13.5523 3.44772 14 4 14H10C10.5523 14 11 13.5523 11 13V7C11 6.44772 10.5523 6 10 6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
                 <div class="account-balance-label">Баланс</div>
                 <div class="account-balance">50 000,00 Р</div>
             </div>
@@ -380,13 +396,51 @@ function renderAccounts() {
             </div>
             <div class="account-info">
                 <div class="account-id-label">Номер счета</div>
-                <div class="account-id">4081 7810 0999 1000 4322</div>
+                <div class="account-id-wrapper">
+                    <div class="account-id">40817810099910004322</div>
+                    <button class="copy-account-btn" data-account="40817810099910004322" title="Скопировать номер счета">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.6667 10.6667H13.3333C13.7015 10.6667 14 10.3682 14 10V3.33333C14 2.96515 13.7015 2.66667 13.3333 2.66667H6.66667C6.29848 2.66667 6 2.96515 6 3.33333V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 6H4C3.44772 6 3 6.44772 3 7V13C3 13.5523 3.44772 14 4 14H10C10.5523 14 11 13.5523 11 13V7C11 6.44772 10.5523 6 10 6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
                 <div class="account-balance-label">Баланс</div>
                 <div class="account-balance">75 500,50 Р</div>
             </div>
         `
         accountsContainer.appendChild(placeholder2)
     }
+
+    // Добавляем обработчики для кнопок копирования (включая заглушки)
+    document.querySelectorAll('.copy-account-btn').forEach(btn => {
+        // Проверяем, не добавлен ли уже обработчик
+        if (!btn.hasAttribute('data-listener')) {
+            btn.setAttribute('data-listener', 'true');
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const accountNumber = btn.getAttribute('data-account');
+                try {
+                    await navigator.clipboard.writeText(accountNumber);
+                    // Визуальная обратная связь
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.3333 4L6 11.3333L2.66667 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    `;
+                    btn.style.color = '#28a745';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.style.color = '';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Ошибка копирования:', err);
+                    alert('Не удалось скопировать номер счета');
+                }
+            });
+        }
+    });
 }
 
 // Функция для отрисовки продуктов

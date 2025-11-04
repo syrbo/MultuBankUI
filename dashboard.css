@@ -295,12 +295,47 @@ body {
   margin-bottom: 4px;
 }
 
+.account-id-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .account-id {
   font-size: 16px;
   color: var(--text-primary);
   font-weight: 500;
   letter-spacing: 0.5px;
   font-family: "Courier New", monospace;
+}
+
+.copy-account-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-account-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+.copy-account-btn:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.copy-account-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 .account-balance {
