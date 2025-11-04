@@ -1,4 +1,4 @@
-// Переключение между секциями (прокрутка к нужной секции)
+// Переключение между секциями (показ/скрытие секций)
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
@@ -11,20 +11,28 @@ document.querySelectorAll('.nav-item').forEach(item => {
         // Добавляем активный класс к выбранному пункту
         item.classList.add('active');
 
-        // Получаем секцию для прокрутки
+        // Получаем секцию для показа
         const sectionName = item.getAttribute('data-section');
         const sectionId = sectionName + '-section';
 
-        // Прокручиваем к выбранной секции
+        // Скрываем все секции
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        // Показываем выбранную секцию
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
-            const contentArea = document.querySelector('.content-area');
-            const offsetTop = targetSection.offsetTop - 24; // Учитываем padding контент-области
+            targetSection.style.display = 'block';
 
-            contentArea.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-            });
+            // Если это секция истории, инициализируем диаграммы
+            if (sectionName === 'history') {
+                initializeHistoryCharts();
+            }
+        } else if (sectionName === 'home') {
+            // Показываем главную секцию (счета и продукты)
+            document.getElementById('accounts-section').style.display = 'block';
+            document.getElementById('products-section').style.display = 'block';
         }
     });
 });
@@ -198,8 +206,8 @@ document.querySelectorAll('.close-button').forEach(button => {
 });
 
 async function auth(uname, passw) {
-    let vauth = await doHTTP(VBANK+"auth/bank-token", {}, {}, {"client_id": "team211", "client_secret": passw})
-    let aauth = await doHTTP(ABANK+"auth/bank-token", {}, {}, {"client_id": "team211", "client_secret": passw})
+    let vauth = await doHTTP(VBANK + "auth/bank-token", {}, {}, { "client_id": "team211", "client_secret": passw })
+    let aauth = await doHTTP(ABANK + "auth/bank-token", {}, {}, { "client_id": "team211", "client_secret": passw })
     if ("access_token" in vauth && "access_token" in aauth) {
         VTOKEN = "Bearer " + vauth["access_token"]
         ATOKEN = "Bearer " + aauth["access_token"]
@@ -220,8 +228,8 @@ async function auth(uname, passw) {
 }
 
 async function getConsent(uname, passw) {
-    let vconsent = await doHTTP(VBANK+"account-consents/request", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211"}, {"client_id": uname, "permissions": ["ReadAccountsDetail", "ReadBalances", "ReadTransactionsDetail"], "reason": "", "requesting_bank": "team211", "requesting_bank_name": "team211"}, {})
-    let aconsent = await doHTTP(ABANK+"account-consents/request", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211"}, {"client_id": uname, "permissions": ["ReadAccountsDetail", "ReadBalances", "ReadTransactionsDetail"], "reason": "...", "requesting_bank": "team211", "requesting_bank_name": "Team 211 App"}, {})
+    let vconsent = await doHTTP(VBANK + "account-consents/request", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211" }, { "client_id": uname, "permissions": ["ReadAccountsDetail", "ReadBalances", "ReadTransactionsDetail"], "reason": "", "requesting_bank": "team211", "requesting_bank_name": "team211" }, {})
+    let aconsent = await doHTTP(ABANK + "account-consents/request", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211" }, { "client_id": uname, "permissions": ["ReadAccountsDetail", "ReadBalances", "ReadTransactionsDetail"], "reason": "...", "requesting_bank": "team211", "requesting_bank_name": "Team 211 App" }, {})
     if ("detail" in vconsent && "detail" in aconsent) {
         return window.location.href = "/index.html"
     }
@@ -235,7 +243,7 @@ async function getConsent(uname, passw) {
     window.location.href = "/dashboard.html"
 }
 
-window.onload = async function() {
+window.onload = async function () {
     if (localStorage.getItem("uname") == null || localStorage.getItem("password") == null) {
         return window.location.href = "/index.html"
     }
@@ -245,27 +253,370 @@ window.onload = async function() {
     USERNAME = localStorage.getItem("uname")
     VBANK_CONSENT_ID = localStorage.getItem("vconsent")
     ABANK_CONSENT_ID = localStorage.getItem("aconsent")
-    let vaccounts = await doHTTP(VBANK+"accounts", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID}, null, {"client_id": USERNAME})
-    let aaccounts = await doHTTP(ABANK+"accounts", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID}, null, {"client_id": USERNAME})
+    let vaccounts = await doHTTP(VBANK + "accounts", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
+    let aaccounts = await doHTTP(ABANK + "accounts", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID }, null, { "client_id": USERNAME })
     if (!("detail" in vaccounts)) {
         vaccounts = vaccounts["data"]["account"]
-        vaccounts.forEach(async (acc) => {
-            let balance = await doHTTP(VBANK+"accounts/"+acc["accountId"]+"/balances", {"Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID}, null, {"client_id": USERNAME})//["data"]["balance"][0]["amount"]["amount"]
+        const vbankPromises = vaccounts.map(async (acc) => {
+            let balance = await doHTTP(VBANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
             balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
             ACCOUNTS['vbank']['total_balance'] += balance
-            ACCOUNTS['vbank']["accounts"].push({acc: acc['accountId'], balance: balance})
+            ACCOUNTS['vbank']["accounts"].push({ acc: acc['accountId'], balance: balance })
         })
+        await Promise.all(vbankPromises)
     }
     if (!("detail" in aaccounts)) {
         aaccounts = aaccounts["data"]["account"]
-        aaccounts.forEach(async (acc) => {
-            let balance = await doHTTP(ABANK+"accounts/"+acc["accountId"]+"/balances", {"Authorization": ATOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID}, null, {"client_id": USERNAME})//["data"]["balance"][0]["amount"]["amount"]
+        const abankPromises = aaccounts.map(async (acc) => {
+            let balance = await doHTTP(ABANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": ATOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID }, null, { "client_id": USERNAME })
             balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
             ACCOUNTS['abank']['total_balance'] += balance
-            ACCOUNTS['abank']["accounts"].push({acc: acc['accountId'], balance: balance})
+            ACCOUNTS['abank']["accounts"].push({ acc: acc['accountId'], balance: balance })
         })
+        await Promise.all(abankPromises)
     }
     console.log(ACCOUNTS)
     console.log(ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance'])
-    document.getElementById("totalBalance").textContent = (ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance'])
+
+    // Обновляем общий баланс
+    const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
+    document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Р'
+
+    // Отрисовываем счета
+    renderAccounts()
+
+    // Отрисовываем продукты
+    renderProducts()
+
+    // Обновляем количество счетов
+    const totalAccountsCount = ACCOUNTS['vbank']['accounts'].length + ACCOUNTS['abank']['accounts'].length + ACCOUNTS['sbank']['accounts'].length
+    document.getElementById("totalAccounts").textContent = totalAccountsCount
+
+    // Обработчик клика для поиска
+    document.querySelector('.search-container').addEventListener('click', () => {
+        const searchText = prompt('Введите запрос для поиска:')
+        if (searchText) {
+            console.log('Поиск:', searchText)
+            // Здесь можно добавить логику поиска
+            alert('Поиск: ' + searchText)
+        }
+    })
+
+    // Скрываем все секции кроме главной при загрузке
+    document.querySelectorAll('.content-section').forEach(section => {
+        if (section.id !== 'accounts-section' && section.id !== 'products-section') {
+            section.style.display = 'none';
+        }
+    })
+}
+
+// Функция для отрисовки счетов
+function renderAccounts() {
+    const accountsContainer = document.getElementById('accountsContainer')
+    accountsContainer.innerHTML = '' // Очищаем контейнер
+
+    // Получаем все счета из всех банков
+    let allAccounts = []
+
+    ACCOUNTS['vbank']['accounts'].forEach(acc => {
+        allAccounts.push({ ...acc, bank: 'VBank' })
+    })
+    ACCOUNTS['abank']['accounts'].forEach(acc => {
+        allAccounts.push({ ...acc, bank: 'ABank' })
+    })
+    ACCOUNTS['sbank']['accounts'].forEach(acc => {
+        allAccounts.push({ ...acc, bank: 'SBank' })
+    })
+
+    // Создаем div для каждого счета
+    allAccounts.forEach((account, index) => {
+        const accountDiv = document.createElement('div')
+        accountDiv.className = 'account-item'
+        // Форматируем номер счета с пробелами
+        const formattedAccountId = account.acc.toString().replace(/(\d{4})(?=\d)/g, '$1 ')
+        accountDiv.innerHTML = `
+            <div class="account-header">
+                <div class="account-bank">${account.bank}</div>
+                <div class="account-type">Расчетный счет</div>
+            </div>
+            <div class="account-info">
+                <div class="account-id-label">Номер счета</div>
+                <div class="account-id">${formattedAccountId}</div>
+                <div class="account-balance-label">Баланс</div>
+                <div class="account-balance">${account.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Р</div>
+            </div>
+        `
+        accountsContainer.appendChild(accountDiv)
+    })
+
+    // Если счетов нет, добавляем заглушки
+    if (allAccounts.length === 0) {
+        // Заглушка 1
+        const placeholder1 = document.createElement('div')
+        placeholder1.className = 'account-item'
+        placeholder1.innerHTML = `
+            <div class="account-header">
+                <div class="account-bank">VBank</div>
+                <div class="account-type">Расчетный счет</div>
+            </div>
+            <div class="account-info">
+                <div class="account-id-label">Номер счета</div>
+                <div class="account-id">4081 7810 0999 1000 4321</div>
+                <div class="account-balance-label">Баланс</div>
+                <div class="account-balance">50 000,00 Р</div>
+            </div>
+        `
+        accountsContainer.appendChild(placeholder1)
+
+        // Заглушка 2
+        const placeholder2 = document.createElement('div')
+        placeholder2.className = 'account-item'
+        placeholder2.innerHTML = `
+            <div class="account-header">
+                <div class="account-bank">ABank</div>
+                <div class="account-type">Накопительный счет</div>
+            </div>
+            <div class="account-info">
+                <div class="account-id-label">Номер счета</div>
+                <div class="account-id">4081 7810 0999 1000 4322</div>
+                <div class="account-balance-label">Баланс</div>
+                <div class="account-balance">75 500,50 Р</div>
+            </div>
+        `
+        accountsContainer.appendChild(placeholder2)
+    }
+}
+
+// Функция для отрисовки продуктов
+function renderProducts() {
+    const productsContainer = document.getElementById('productsContainer')
+    productsContainer.innerHTML = '' // Очищаем контейнер
+
+    // Заглушки для продуктов
+    const placeholder1 = document.createElement('div')
+    placeholder1.className = 'product-item'
+    placeholder1.innerHTML = `
+        <div class="product-header">
+            <div class="product-name">Депозит "Накопительный"</div>
+            <div class="product-status">Активен</div>
+        </div>
+        <div class="product-info">
+            <div class="product-detail-row">
+                <span class="product-detail-label">Сумма депозита:</span>
+                <span class="product-detail-value">1 000 000,00 Р</span>
+            </div>
+            <div class="product-detail-row">
+                <span class="product-detail-label">Срок:</span>
+                <span class="product-detail-value">12 месяцев</span>
+            </div>
+            <div class="product-detail-row">
+                <span class="product-detail-label">Процентная ставка:</span>
+                <span class="product-detail-value">7,5% годовых</span>
+            </div>
+        </div>
+    `
+    productsContainer.appendChild(placeholder1)
+
+    const placeholder2 = document.createElement('div')
+    placeholder2.className = 'product-item'
+    placeholder2.innerHTML = `
+        <div class="product-header">
+            <div class="product-name">Кредитная карта "Премиум"</div>
+            <div class="product-status">Активна</div>
+        </div>
+        <div class="product-info">
+            <div class="product-detail-row">
+                <span class="product-detail-label">Кредитный лимит:</span>
+                <span class="product-detail-value">500 000,00 Р</span>
+            </div>
+            <div class="product-detail-row">
+                <span class="product-detail-label">Использовано:</span>
+                <span class="product-detail-value">125 000,00 Р</span>
+            </div>
+            <div class="product-detail-row">
+                <span class="product-detail-label">Доступно:</span>
+                <span class="product-detail-value">375 000,00 Р</span>
+            </div>
+        </div>
+    `
+    productsContainer.appendChild(placeholder2)
+}
+
+// Переменные для хранения экземпляров диаграмм
+let incomeChart = null;
+let expenseChart = null;
+
+// Цвета для категорий
+const chartColors = [
+    '#dc3545', // красный
+    '#fd7e14', // оранжевый
+    '#ffc107', // желтый
+    '#198754', // темно-зеленый
+    '#0d6efd', // синий
+    '#0dcaf0'  // светло-синий
+];
+
+// Функция инициализации диаграмм истории
+function initializeHistoryCharts() {
+    // Данные для примера (можно заменить на реальные данные из API)
+    const incomeData = {
+        labels: ['Зарплата', 'Дивиденды', 'Проценты', 'Подарки', 'Возвраты', 'Прочее'],
+        values: [50000, 15000, 5000, 3000, 2000, 1000],
+        colors: chartColors
+    };
+
+    const expenseData = {
+        labels: ['Продукты', 'Транспорт', 'Развлечения', 'Одежда', 'Коммунальные', 'Прочее'],
+        values: [20000, 15000, 10000, 8000, 5000, 2000],
+        colors: chartColors
+    };
+
+    // Создаем диаграмму доходов
+    if (incomeChart) {
+        incomeChart.destroy();
+    }
+    const incomeCtx = document.getElementById('incomeChart');
+    if (incomeCtx) {
+        incomeChart = new Chart(incomeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: incomeData.labels,
+                datasets: [{
+                    data: incomeData.values,
+                    backgroundColor: incomeData.colors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+        renderChartLegend('incomeLegend', incomeData);
+    }
+
+    // Создаем диаграмму расходов
+    if (expenseChart) {
+        expenseChart.destroy();
+    }
+    const expenseCtx = document.getElementById('expenseChart');
+    if (expenseCtx) {
+        expenseChart = new Chart(expenseCtx, {
+            type: 'doughnut',
+            data: {
+                labels: expenseData.labels,
+                datasets: [{
+                    data: expenseData.values,
+                    backgroundColor: expenseData.colors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+        renderChartLegend('expenseLegend', expenseData);
+    }
+}
+
+// Функция отрисовки легенды диаграммы
+function renderChartLegend(legendId, data) {
+    const legendContainer = document.getElementById(legendId);
+    if (!legendContainer) return;
+
+    const total = data.values.reduce((sum, val) => sum + val, 0);
+
+    legendContainer.innerHTML = '';
+
+    data.labels.forEach((label, index) => {
+        const value = data.values[index];
+        const percentage = ((value / total) * 100).toFixed(1);
+        const color = data.colors[index];
+        const barWidth = Math.min((value / total * 100) * 2, 200);
+
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+
+        legendItem.innerHTML = `
+            <div class="legend-color" style="background-color: ${color}"></div>
+            <div class="legend-bar" style="background: linear-gradient(90deg, ${color}40 0%, ${color}20 100%); width: ${barWidth}px;"></div>
+            <span class="legend-label">${label}</span>
+            <span class="legend-value">${value.toLocaleString('ru-RU')} Р (${percentage}%)</span>
+        `;
+
+        legendContainer.appendChild(legendItem);
+    });
+}
+
+// Функция обновления диаграмм на основе реальных данных
+function updateHistoryCharts(transactions) {
+    // Группируем транзакции по типам и категориям
+    const incomeCategories = {};
+    const expenseCategories = {};
+
+    transactions.forEach(transaction => {
+        if (transaction.amount > 0) {
+            // Доход
+            const category = transaction.category || 'Прочее';
+            incomeCategories[category] = (incomeCategories[category] || 0) + transaction.amount;
+        } else {
+            // Расход
+            const category = transaction.category || 'Прочее';
+            expenseCategories[category] = (expenseCategories[category] || 0) + Math.abs(transaction.amount);
+        }
+    });
+
+    // Формируем данные для доходов
+    const incomeLabels = Object.keys(incomeCategories);
+    const incomeValues = Object.values(incomeCategories);
+
+    // Формируем данные для расходов
+    const expenseLabels = Object.keys(expenseCategories);
+    const expenseValues = Object.values(expenseCategories);
+
+    // Обновляем диаграммы
+    if (incomeChart && incomeLabels.length > 0) {
+        incomeChart.data.labels = incomeLabels;
+        incomeChart.data.datasets[0].data = incomeValues;
+        incomeChart.data.datasets[0].backgroundColor = chartColors.slice(0, incomeLabels.length);
+        incomeChart.update();
+
+        renderChartLegend('incomeLegend', {
+            labels: incomeLabels,
+            values: incomeValues,
+            colors: chartColors.slice(0, incomeLabels.length)
+        });
+    }
+
+    if (expenseChart && expenseLabels.length > 0) {
+        expenseChart.data.labels = expenseLabels;
+        expenseChart.data.datasets[0].data = expenseValues;
+        expenseChart.data.datasets[0].backgroundColor = chartColors.slice(0, expenseLabels.length);
+        expenseChart.update();
+
+        renderChartLegend('expenseLegend', {
+            labels: expenseLabels,
+            values: expenseValues,
+            colors: chartColors.slice(0, expenseLabels.length)
+        });
+    }
 }
