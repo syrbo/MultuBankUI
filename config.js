@@ -13,11 +13,16 @@ let SBANK_PCONSENT_ID = ""
 let USERNAME = ""
 
 let ACCOUNTS = {
-    "vbank": {total_balance: 0, accounts: []},
-    "abank": {total_balance: 0, accounts: []},
-    "sbank": {total_balance: 0, accounts: []}
+    "vbank": {total_balance: 0, accounts: {}},
+    "abank": {total_balance: 0, accounts: {}},
+    "sbank": {total_balance: 0, accounts: {}}
 }
 let PRODUCTS = {
+    "vbank": [],
+    "abank": [],
+    "sbank": []
+}
+let TRANSACTIONS = {
     "vbank": [],
     "abank": [],
     "sbank": []

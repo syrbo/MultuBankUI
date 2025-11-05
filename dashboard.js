@@ -1,7 +1,7 @@
 
 // Переключение между секциями (показ/скрытие секций)
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
+document.querySelectorAll('.nav-item').forEach(async item => {
+    item.addEventListener('click', async (e) => {
         e.preventDefault();
 
         // Убираем активный класс у всех пунктов меню
@@ -28,7 +28,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
 
             // Если это секция истории, инициализируем диаграммы
             if (sectionName === 'history') {
-                initializeHistoryCharts();
+                await initializeHistoryCharts();
             }
         } else if (sectionName === 'home') {
             // Показываем главную секцию (счета и продукты)
@@ -319,6 +319,7 @@ window.onload = async function () {
     
     document.getElementById("greeting").innerHTML = "Добрый день, " + USERNAME
     getProductConsents()
+    
     let vaccounts = await doHTTP(VBANK + "accounts", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
     let aaccounts = await doHTTP(ABANK + "accounts", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID }, null, { "client_id": USERNAME })
     if (SBANK_CONSENT_ID.search("consent") != -1) {
@@ -330,7 +331,8 @@ window.onload = async function () {
                 console.log(balance)
                 balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
                 ACCOUNTS['sbank']['total_balance'] += balance
-                ACCOUNTS['sbank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') })
+                ACCOUNTS['sbank']['accounts'][acc.accountId] = { acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') }
+                //ACCOUNTS['sbank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') })
             })
             await Promise.all(sbankPromises)
         }
@@ -341,7 +343,8 @@ window.onload = async function () {
             let balance = await doHTTP(VBANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
             balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
             ACCOUNTS['vbank']['total_balance'] += balance
-            ACCOUNTS['vbank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') })
+            ACCOUNTS['vbank']['accounts'][acc.accountId] = { acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') }
+            //ACCOUNTS['vbank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') })
         })
         await Promise.all(vbankPromises)
     }
@@ -351,10 +354,12 @@ window.onload = async function () {
             let balance = await doHTTP(ABANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": ATOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID }, null, { "client_id": USERNAME })
             balance = parseFloat(balance['data']['balance'][0]['amount']['amount'])
             ACCOUNTS['abank']['total_balance'] += balance
-            ACCOUNTS['abank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') })
+            ACCOUNTS['abank']['accounts'][acc.accountId] = { acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') }
+            //ACCOUNTS['abank']["accounts"].push({ acc: acc['accountId'], balance: balance, accId: acc['account'][0]['identification'], type: (acc['accountSubType'] == 'Checking' ? 'Расчётный' : 'Накопительный') })
         })
         await Promise.all(abankPromises)
     }
+    await getTransactions()
     console.log(ACCOUNTS)
     console.log(ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance'])
 
@@ -370,7 +375,7 @@ window.onload = async function () {
     renderProducts()
 
     // Обновляем количество счетов
-    const totalAccountsCount = ACCOUNTS['vbank']['accounts'].length + ACCOUNTS['abank']['accounts'].length + ACCOUNTS['sbank']['accounts'].length
+    const totalAccountsCount = Object.values(ACCOUNTS['vbank']['accounts']).length + Object.values(ACCOUNTS['abank']['accounts']).length + Object.values(ACCOUNTS['sbank']['accounts']).length
     document.getElementById("totalAccounts").textContent = totalAccountsCount
 
     // Обработчик клика для поиска
@@ -399,13 +404,13 @@ function renderAccounts() {
     // Получаем все счета из всех банков
     let allAccounts = []
 
-    ACCOUNTS['vbank']['accounts'].forEach(acc => {
+    Object.values(ACCOUNTS['vbank']['accounts']).forEach(acc => {
         allAccounts.push({ ...acc, bank: 'VBank' })
     })
-    ACCOUNTS['abank']['accounts'].forEach(acc => {
+    Object.values(ACCOUNTS['abank']['accounts']).forEach(acc => {
         allAccounts.push({ ...acc, bank: 'ABank' })
     })
-    ACCOUNTS['sbank']['accounts'].forEach(acc => {
+    Object.values(ACCOUNTS['sbank']['accounts']).forEach(acc => {
         allAccounts.push({ ...acc, bank: 'SBank' })
     })
 
@@ -714,18 +719,108 @@ const chartColors = [
     '#0dcaf0'  // светло-синий
 ];
 
+function formatISOToDateTime(isoString) {
+    // Создаем объект Date из строки ISO
+    const date = new Date(isoString);
+    
+    // Проверяем, что дата валидна
+    if (isNaN(date.getTime())) {
+        return isoString
+    }
+    
+    // Получаем компоненты даты
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    // Форматируем в нужный вид
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+}
+
+async function getTransactions() {
+    Object.values(ACCOUNTS['vbank']['accounts']).forEach(async (elem, index) => {
+        let a = await doHTTP(VBANK+"accounts/"+elem['acc']+"/transactions", {"Authorization": VTOKEN, "X-Consent-Id": VBANK_CONSENT_ID, "X-Requesting-Bank": "team211"}, null, {"limit": 100})
+        a = a.data.transaction
+        a["bank"] = "VBank"
+        console.log(a)
+        TRANSACTIONS['vbank'].push(...a)
+    })
+    Object.values(ACCOUNTS['abank']['accounts']).forEach(async (elem, index) => {
+        let a = await doHTTP(ABANK+"accounts/"+elem['acc']+"/transactions", {"Authorization": ATOKEN, "X-Consent-Id": ABANK_CONSENT_ID, "X-Requesting-Bank": "team211"}, null, {"limit": 100})
+        a = a.data.transaction
+        a["bank"] = "ABank"
+        TRANSACTIONS['abank'].push(...a)
+    })
+    if (SBANK_CONSENT_ID.search("consent") != -1) {
+        Object.values(ACCOUNTS['sbank']['accounts']).forEach(async (elem, index) => {
+            let a = await doHTTP(SBANK+"accounts/"+elem['acc']+"/transactions", {"Authorization": STOKEN, "X-Consent-Id": SBANK_CONSENT_ID, "X-Requesting-Bank": "team211"}, null, {"limit": 100})
+            a = a.data.transaction
+            a["bank"] = "SBank"
+            TRANSACTIONS['sbank'].push(...a)
+        })
+    }
+}
+
+function fillTransactionTable(allTransactions) {
+    let container = document.getElementById("tableContainer")
+    allTransactions.forEach((elem, i) => {
+        console.log(elem)
+        let type = elem.bankTransactionCode.code
+        let info = elem.transactionInformation
+        //let accInfo = elem.bank + " " + ACCOUNTS[elem.bank.toLowerCase()][elem.accountId].accId + " | "
+        let item = document.createElement("div")
+        let p1 = document.createElement('p')
+        p1.className = "transactionName"
+        p1.innerHTML = /*accInfo +*/ info
+        let p2 = document.createElement('p')
+        p2.className = "transactionAmount"
+        if (type.search("Received") != -1) {
+            p2.innerHTML = "+" + elem.amount.amount
+        } else {
+            p2.innerHTML = "-" + elem.amount.amount
+        }
+        let p3 = document.createElement("p")
+        p3.className = "transactionName"
+        p3.innerHTML = formatISOToDateTime( elem.bookingDateTime )
+        item.appendChild(p1)
+        item.appendChild(p2)
+        item.appendChild(p3)
+        item.appendChild(document.createElement("hr"))
+        container.appendChild(item)
+    })
+}
+
 // Функция инициализации диаграмм истории
-function initializeHistoryCharts() {
+async function initializeHistoryCharts() {
+    let allTransactions = [...TRANSACTIONS['vbank'], ...TRANSACTIONS['abank'], ...TRANSACTIONS['sbank']]
+    fillTransactionTable(allTransactions)
+    console.log(allTransactions)
+    let incomes = {}
+    let expenses = {}
+    allTransactions.forEach((elem, i) => {
+        let type = elem.bankTransactionCode.code
+        let info = elem.transactionInformation
+        if (info.search("Перевод") != -1) info = "Переводы"
+        if (type.search("Received") != -1) {
+            if (info in incomes) incomes[info] += parseFloat(elem.amount.amount)
+            else incomes[info] = parseFloat(elem.amount.amount)
+        } else {
+            if (info in expenses) expenses[info] += parseFloat(elem.amount.amount)
+            else expenses[info] = parseFloat(elem.amount.amount)
+        }
+    })
     // Данные для примера (можно заменить на реальные данные из API)
     const incomeData = {
-        labels: ['Зарплата', 'Дивиденды', 'Проценты', 'Подарки', 'Возвраты', 'Прочее'],
-        values: [50000, 15000, 5000, 3000, 2000, 1000],
+        labels: Object.keys(incomes),
+        values: Object.values(incomes),
         colors: chartColors
     };
 
     const expenseData = {
-        labels: ['Продукты', 'Транспорт', 'Развлечения', 'Одежда', 'Коммунальные', 'Прочее'],
-        values: [20000, 15000, 10000, 8000, 5000, 2000],
+        labels: Object.keys(expenses),
+        values: Object.values(expenses),
         colors: chartColors
     };
 

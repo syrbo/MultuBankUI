@@ -637,3 +637,11 @@ body {
     font-size: 20px;
   }
 }
+
+.transactionName {
+  display: inline;
+}
+
+.transactionAmount {
+  display: inline;
+}
