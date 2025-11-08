@@ -176,19 +176,19 @@
                 <h2 class="section-title">Переводы</h2>
                 <div class="transfers-container" id="transfersContainer">
                     <label for="bankFilter">С</label>
-                    <select class="filter-select-transfer" id="bankFilter">
+                    <select class="filter-select-transfer" id="bankFilterFrom">
                         <option value="vbank">VBank</option>
                         <option value="abank">ABank</option>
                         <option value="sbank">SBank</option>
                     </select>
                     <label for="from">откуда</label>
-                    <input type="text" id="from" required minlength="19" maxlength="19" />
+                    <input type="text" id="from" required minlength="19" maxlength="19" placeholder="Введите счёт"/>
                     <label for="where">куда</label>
-                    <input type="text" id="where" required minlength="19" maxlength="19" />
+                    <input type="text" id="where" required minlength="19" maxlength="19" placeholder="Введите счёт"/>
                     <label for="from">сумма</label>
-                    <input type="text" id="money" required minlength="19" maxlength="19" />
+                    <input type="text" id="money" required minlength="19" maxlength="19" placeholder="Введите сумму в ₽"/>
                     <label for="bankFilter">на</label>
-                    <select class="filter-select-transfer" id="bankFilter">
+                    <select class="filter-select-transfer" id="bankFilterWhere">
                         <option value="vbank">VBank</option>
                         <option value="abank">ABank</option>
                         <option value="sbank">SBank</option>
