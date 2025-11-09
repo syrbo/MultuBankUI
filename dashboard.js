@@ -1115,6 +1115,7 @@ async function makeTransaction() {
     console.log(payment)
     if ("detail" in payment) {
         if (payment['detail'] == "Insufficient funds") return alert("❌ Недостаточно средств")
+        if (payment['detail'].search("not found in any bank") != -1) return alert("❌ Указанного счета не существует")
     }
     if (payment["data"]["status"] == "AcceptedSettlementCompleted") {
         await getAccounts()
