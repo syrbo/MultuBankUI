@@ -489,6 +489,15 @@ body {
   margin-bottom: 24px;
 }
 
+.another-text-vip {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  width: 750px;
+}
+
 .filters-container {
   display: flex;
   gap: 16px;
@@ -596,6 +605,13 @@ body {
 /* Скрытие секций */
 .content-section {
   display: block;
+}
+
+.content-section-vip{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .content-section.hidden {
@@ -749,4 +765,21 @@ input {
   padding: 24px;
   border: var(--border);
   margin: auto;
+}
+
+.c1-center-after{
+  margin-top: 80px;
+  margin-bottom: 40px;
+}
+
+table {
+  border-collapse: collapse;
+  text-align: center;
+}
+
+th, td {
+  width: 205px;
+  padding: 10px;
+  border-left: 1px solid;
+  border-right: 1px solid;
 }
