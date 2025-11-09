@@ -45,11 +45,21 @@
                     <span class="nav-icon nav-icon-mask" style="--icon-url: url('media/file-ruble.svg')"></span>
                     <span class="nav-text">Переводы</span>
                 </a>
+                <a href="#" class="nav-item" data-section="vip">
+                    <span class="nav-icon nav-icon-mask" style="--icon-url: url('media/person-plus.svg')"></span>
+                    <span class="nav-text">Премиум</span>
+                </a>
             </nav>
 
             <div class="sidebar-bottom">
-                <div class="account-icon">v</div>
-                <span class="account-text">Аккаунт</span>
+                <button class="nav-item-bottom">
+                    <span class="nav-icon nav-icon-mask" style="--icon-url: url('media/exit.svg')"></span>
+                    <span class="nav-text">Выйти</span>
+                </button>
+                <div class="nav-item-bottom">
+                    <div class="account-icon">v</div>
+                    <span class="account-text">Аккаунт</span>
+                </div>
             </div>
         </aside>
 
@@ -193,7 +203,65 @@
                         <option value="abank">ABank</option>
                         <option value="sbank">SBank</option>
                     </select> -->
-                    <button onclick="makeTransaction()">Перевести</button>
+                    <button class="button-functional" onclick="makeTransaction()">Перевести</button>
+                </div>
+                <div class="contacts-div">
+                    <h2 class="section-title">Добавить в контакты</h2>
+                    <h2 class="section-title">Добавить в контакты</h2>
+                    
+                </div>
+                <div class="contacts-div">
+                    <div class="panel-card">
+                        <a>d</a>
+                    </div>
+                    
+                    <div class="panel-card">
+                        <a>bv</a>
+                        <a>bv</a>
+                        <a>bv</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Премиум-->
+             <div class="content-section" id="vip-section">
+                <h2 class="section-title">Переводы</h2>
+                <div class="transfers-container" id="transfersContainer">
+                    <label for="bankFilter">С</label>
+                    <select class="filter-select-transfer" id="bankFilterFrom">
+                        <option value="vbank">VBank</option>
+                        <option value="abank">ABank</option>
+                        <option value="sbank">SBank</option>
+                    </select>
+                    <label for="from">откуда</label>
+                    <input type="text" id="from" required />
+                    <label for="where">куда</label>
+                    <input type="text" id="where" required />
+                    <label for="from">сумма</label>
+                    <input type="text" id="money" required />
+                    <!-- <label for="bankFilter">на</label>
+                    <select class="filter-select-transfer" id="bankFilterWhere">
+                        <option value="vbank">VBank</option>
+                        <option value="abank">ABank</option>
+                        <option value="sbank">SBank</option>
+                    </select> -->
+                    <button class="button-functional" onclick="makeTransaction()">Перевести</button>
+                </div>
+                <div class="contacts-div">
+                    <h2 class="section-title">Добавить в контакты</h2>
+                    <h2 class="section-title">Добавить в контакты</h2>
+                    
+                </div>
+                <div class="contacts-div">
+                    <div class="panel-card">
+                        <a>d</a>
+                    </div>
+                    
+                    <div class="panel-card">
+                        <a>bv</a>
+                        <a>bv</a>
+                        <a>bv</a>
+                    </div>
                 </div>
             </div>
         </main>
