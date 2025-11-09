@@ -48,8 +48,14 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <div class="account-icon">v</div>
-                <span class="account-text">Аккаунт</span>
+                <button class="nav-item-bottom">
+                    <span class="nav-icon nav-icon-mask" style="--icon-url: url('media/exit.svg')"></span>
+                    <span class="nav-text">Выйти</span>
+                </button>
+                <div class="nav-item-bottom">
+                    <div class="account-icon">v</div>
+                    <span class="account-text">Аккаунт</span>
+                </div>
             </div>
         </aside>
 
@@ -193,7 +199,7 @@
                         <option value="abank">ABank</option>
                         <option value="sbank">SBank</option>
                     </select> -->
-                    <button onclick="makeTransaction()">Перевести</button>
+                    <button class="button-functional" onclick="makeTransaction()">Перевести</button>
                 </div>
             </div>
         </main>
