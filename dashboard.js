@@ -410,14 +410,11 @@ window.onload = async function () {
 
     document.getElementById("greeting").innerHTML = "Добрый день, " + USERNAME
     await getProductConsents()
-    await getAccounts()
-    await getTransactions()
+    
+    await updateAccountsAndTransactions()
     console.log(ACCOUNTS)
-    console.log(ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance'])
 
-    // Обновляем общий баланс
-    const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
-    document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+    setInterval(await updateAccountsAndTransactions, 30000)
 
     // Отрисовываем счета
     renderAccounts()
@@ -425,10 +422,6 @@ window.onload = async function () {
     // Отрисовываем продукты
     await getProducts()
     renderProducts()
-
-    // Обновляем количество счетов
-    const totalAccountsCount = Object.values(ACCOUNTS['vbank']['accounts']).length + Object.values(ACCOUNTS['abank']['accounts']).length + Object.values(ACCOUNTS['sbank']['accounts']).length
-    document.getElementById("totalAccounts").textContent = totalAccountsCount
 
     // Обработчик клика для поиска
     document.querySelector('.search-container').addEventListener('click', () => {
@@ -450,6 +443,17 @@ window.onload = async function () {
     loadScenarios();
 }
 
+async function updateAccountsAndTransactions() {
+    console.log("update")
+    await getAccounts()
+    renderAccounts()
+    await getTransactions()
+    let allTransactions = [...TRANSACTIONS['vbank'], ...TRANSACTIONS['abank'], ...TRANSACTIONS['sbank']]
+    fillTransactionTable(allTransactions)
+    const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
+    document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+}
+
 // Функция для отрисовки счетов
 function renderAccounts() {
     const accountsContainer = document.getElementById('accountsContainer')
@@ -467,6 +471,9 @@ function renderAccounts() {
     Object.values(ACCOUNTS['sbank']['accounts']).forEach(acc => {
         allAccounts.push({ ...acc, bank: 'SBank' })
     })
+
+    const totalAccountsCount = Object.values(ACCOUNTS['vbank']['accounts']).length + Object.values(ACCOUNTS['abank']['accounts']).length + Object.values(ACCOUNTS['sbank']['accounts']).length
+    document.getElementById("totalAccounts").textContent = totalAccountsCount
 
     // Создаем div для каждого счета
     allAccounts.forEach((account, index) => {
@@ -886,35 +893,56 @@ async function getTransactions() {
 }
 
 function fillTransactionTable(allTransactions) {
-    allTransactions.sort((a, b) => new Date(b.bookingDateTime).getTime().toString().localeCompare(new Date(a.bookingDateTime).getTime().toString()))
-    let container = document.getElementById("tableContainer")
-    container.innerHTML = ""
-    allTransactions.forEach((elem, i) => {
-        let type = elem.bankTransactionCode.code
-        let info = elem.transactionInformation
-        console.log(ACCOUNTS[elem.bank.toLowerCase()])
-        let accInfo = elem.bank + " " + ACCOUNTS[elem.bank.toLowerCase()]["accounts"][elem.accountId].accId + " | "
-        let item = document.createElement("div")
-        let p1 = document.createElement('p')
-        p1.className = "transactionName"
-        p1.innerHTML = accInfo + info + " "
-        let p2 = document.createElement('p')
-        p2.className = "transactionAmount"
-        p2.innerHTML = elem.amount.amount + " руб."
-        // if (type == "02") {
-        //     p2.innerHTML = "+" + elem.amount.amount
-        // } else {
-        //     p2.innerHTML = "-" + elem.amount.amount
-        // }
-        let p3 = document.createElement("p")
-        p3.className = "transactionName"
-        p3.innerHTML = " " + formatISOToDateTime(elem.bookingDateTime)
-        item.appendChild(p1)
-        item.appendChild(p2)
-        item.appendChild(p3)
-        item.appendChild(document.createElement("hr"))
-        container.appendChild(item)
-    })
+    allTransactions.sort((a, b) => new Date(b.bookingDateTime) - new Date(a.bookingDateTime));
+
+    const container = document.getElementById("tableContainer");
+
+    if (!container) return;
+    container.innerHTML = "";
+
+    allTransactions.forEach((transaction) => {
+        const bankKey = transaction.bank?.toLowerCase();
+        const accountsByBank = bankKey ? ACCOUNTS[bankKey]?.accounts : null;
+        const accountDetails = accountsByBank ? accountsByBank[transaction.accountId] : null;
+        const accountNumber = accountDetails?.accId || accountDetails?.acc || transaction.accountId || "—";
+        const bankName = transaction.bank || "Банк";
+        const description = transaction.transactionInformation || "Операция";
+        const amountRaw = parseFloat(transaction.amount?.amount ?? "0");
+        const typeCode = transaction.bankTransactionCode?.code || "";
+        const isIncome = typeCode === "02" || amountRaw >= 0;
+        const amountValue = Math.abs(amountRaw);
+        const formattedAmount = amountValue.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const displayDate = formatISOToDateTime(transaction.bookingDateTime);
+        const card = document.createElement("div");
+        card.className = "transaction-card";
+        const header = document.createElement("div");
+        header.className = "transaction-card__header";
+        const title = document.createElement("div");
+        title.className = "transaction-card__title";
+        title.textContent = description;
+        const amount = document.createElement("div");
+        amount.className = `transaction-card__amount ${isIncome ? "income" : "expense"}`;
+        amount.textContent = `${isIncome ? "+" : "-"}${formattedAmount} ₽`;
+        header.appendChild(title);
+        header.appendChild(amount);
+        const meta = document.createElement("div");
+        meta.className = "transaction-card__meta";
+        const bankMeta = document.createElement("div");
+        bankMeta.className = "transaction-card__meta-item";
+        bankMeta.innerHTML = `<span>Банк:</span><span>${bankName}</span>`;
+        const accountMeta = document.createElement("div");
+        accountMeta.className = "transaction-card__meta-item";
+        accountMeta.innerHTML = `<span>Счет:</span><span>${accountNumber}</span>`;
+        const dateMeta = document.createElement("div");
+        dateMeta.className = "transaction-card__meta-item";
+        dateMeta.innerHTML = `<span>Дата:</span><span>${displayDate}</span>`;
+        meta.appendChild(bankMeta);
+        meta.appendChild(accountMeta);
+        meta.appendChild(dateMeta);
+        card.appendChild(header);
+        card.appendChild(meta);
+        container.appendChild(card);
+    });
 }
 
 // Функция инициализации диаграмм истории
@@ -1161,11 +1189,12 @@ async function makeTransaction() {
         if (payment['detail'] == "Insufficient funds") return alert("❌ Недостаточно средств")
     }
     if (payment["data"]["status"] == "AcceptedSettlementCompleted") {
-        await getAccounts()
-        renderAccounts();
-        await getTransactions();
-        const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
-        document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+        // await getAccounts()
+        // renderAccounts();
+        // await getTransactions();
+        // const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
+        // document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+        await updateAccountsAndTransactions()
         return alert("✅ Средства успешно переведены!")
     }
 }
@@ -1309,10 +1338,11 @@ async function purchasePremium() {
     if (payment["data"]["status"] == "AcceptedSettlementCompleted") {
         IS_PREMIUM = "1"
         localStorage.setItem("premium", IS_PREMIUM)
-        await getAccounts()
-        renderAccounts();
-        await getTransactions();
-        const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
+        await updateAccountsAndTransactions()
+        // await getAccounts()
+        // renderAccounts();
+        // await getTransactions();
+        // const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
         document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
         document.getElementById("premium_button").className = "premium-activated"
         document.getElementById("premium_button").innerHTML = "Оформлено!"
