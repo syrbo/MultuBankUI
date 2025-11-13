@@ -876,35 +876,68 @@ async function getTransactions() {
 }
 
 function fillTransactionTable(allTransactions) {
-    allTransactions.sort((a, b) => new Date(b.bookingDateTime).getTime().toString().localeCompare(new Date(a.bookingDateTime).getTime().toString()))
-    let container = document.getElementById("tableContainer")
-    container.innerHTML = ""
-    allTransactions.forEach((elem, i) => {
-        let type = elem.bankTransactionCode.code
-        let info = elem.transactionInformation
-        console.log(ACCOUNTS[elem.bank.toLowerCase()])
-        let accInfo = elem.bank + " " + ACCOUNTS[elem.bank.toLowerCase()]["accounts"][elem.accountId].accId + " | "
-        let item = document.createElement("div")
-        let p1 = document.createElement('p')
-        p1.className = "transactionName"
-        p1.innerHTML = accInfo + info + " "
-        let p2 = document.createElement('p')
-        p2.className = "transactionAmount"
-        p2.innerHTML = elem.amount.amount + " руб."
-        // if (type == "02") {
-        //     p2.innerHTML = "+" + elem.amount.amount
-        // } else {
-        //     p2.innerHTML = "-" + elem.amount.amount
-        // }
-        let p3 = document.createElement("p")
-        p3.className = "transactionName"
-        p3.innerHTML = " " + formatISOToDateTime(elem.bookingDateTime)
-        item.appendChild(p1)
-        item.appendChild(p2)
-        item.appendChild(p3)
-        item.appendChild(document.createElement("hr"))
-        container.appendChild(item)
-    })
+    allTransactions.sort((a, b) => new Date(b.bookingDateTime) - new Date(a.bookingDateTime));
+    const container = document.getElementById("tableContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    allTransactions.forEach((transaction) => {
+        const bankKey = transaction.bank?.toLowerCase();
+        const accountsByBank = bankKey ? ACCOUNTS[bankKey]?.accounts : null;
+        const accountDetails = accountsByBank ? accountsByBank[transaction.accountId] : null;
+
+        const accountNumber = accountDetails?.accId || accountDetails?.acc || transaction.accountId || "—";
+        const bankName = transaction.bank || "Банк";
+        const description = transaction.transactionInformation || "Операция";
+        const amountRaw = parseFloat(transaction.amount?.amount ?? "0");
+        const typeCode = transaction.bankTransactionCode?.code || "";
+        const isIncome = typeCode === "02" || amountRaw >= 0;
+        const amountValue = Math.abs(amountRaw);
+        const formattedAmount = amountValue.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const displayDate = formatISOToDateTime(transaction.bookingDateTime);
+
+        const card = document.createElement("div");
+        card.className = "transaction-card";
+
+        const header = document.createElement("div");
+        header.className = "transaction-card__header";
+
+        const title = document.createElement("div");
+        title.className = "transaction-card__title";
+        title.textContent = description;
+
+        const amount = document.createElement("div");
+        amount.className = `transaction-card__amount ${isIncome ? "income" : "expense"}`;
+        amount.textContent = `${isIncome ? "+" : "-"}${formattedAmount} ₽`;
+
+        header.appendChild(title);
+        header.appendChild(amount);
+
+        const meta = document.createElement("div");
+        meta.className = "transaction-card__meta";
+
+        const bankMeta = document.createElement("div");
+        bankMeta.className = "transaction-card__meta-item";
+        bankMeta.innerHTML = `<span>Банк:</span><span>${bankName}</span>`;
+
+        const accountMeta = document.createElement("div");
+        accountMeta.className = "transaction-card__meta-item";
+        accountMeta.innerHTML = `<span>Счет:</span><span>${accountNumber}</span>`;
+
+        const dateMeta = document.createElement("div");
+        dateMeta.className = "transaction-card__meta-item";
+        dateMeta.innerHTML = `<span>Дата:</span><span>${displayDate}</span>`;
+
+        meta.appendChild(bankMeta);
+        meta.appendChild(accountMeta);
+        meta.appendChild(dateMeta);
+
+        card.appendChild(header);
+        card.appendChild(meta);
+
+        container.appendChild(card);
+    });
 }
 
 // Функция инициализации диаграмм истории

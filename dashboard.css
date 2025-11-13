@@ -1,5 +1,5 @@
 :root {
-  --primary-red: #FC4E2F;
+  --primary-red: #fc4e2f;
   --sidebar-bg: #ffffff;
   --main-bg: #f8f8f8;
   --text-primary: #1c1b1f;
@@ -34,7 +34,7 @@ body {
 .sidebar {
   width: 240px;
   height: 100vh;
-  position:fixed;
+  position: fixed;
   background: var(--main-bg);
   display: flex;
   flex-direction: column;
@@ -71,7 +71,6 @@ body {
   -khtml-user-select: none;
   -webkit-user-select: none;
   -o-user-select: none;
-
 }
 
 .search-container {
@@ -122,7 +121,6 @@ body {
   position: relative;
   transition: all 0.2s;
   text-align: left;
-
 }
 
 .nav-item-bottom:hover {
@@ -542,7 +540,6 @@ body {
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 40px;
-
 }
 
 .filter-select:focus {
@@ -552,6 +549,67 @@ body {
 
 .table-container {
   min-height: 300px;
+  display: grid;
+  gap: 16px;
+}
+
+.transaction-card {
+  background: var(--card-bg);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.transaction-card--placeholder {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 120px;
+  color: var(--text-secondary);
+  gap: 8px;
+}
+
+.transaction-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.transaction-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.transaction-card__amount {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.transaction-card__amount.income {
+  color: #198754;
+}
+
+.transaction-card__amount.expense {
+  color: #dc3545;
+}
+
+.transaction-card__meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.transaction-card__meta-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .chart-container {
@@ -615,7 +673,7 @@ body {
   display: block;
 }
 
-.content-section-vip{
+.content-section-vip {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -720,23 +778,11 @@ body {
   }
 }
 
-.transactionName {
-  display: inline;
-}
-
-.transactionAmount {
-  display: inline;
-}
-
-hr {
-  color: rgba(0, 0, 0, 0.2);
-}
-
 button {
   box-shadow: none;
   border-radius: 8px;
-  border: 2px solid #F8F8F8;
-  background: #F8F8F8;
+  border: 2px solid #f8f8f8;
+  background: #f8f8f8;
   text-align: center;
   padding: 5px;
 }
@@ -771,7 +817,7 @@ input {
   margin-top: 24px;
 }
 
-.contacts-container{
+.contacts-container {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -782,7 +828,7 @@ input {
   margin: auto;
 }
 
-.c1-center-after{
+.c1-center-after {
   margin-top: 80px;
   margin-bottom: 40px;
 }
@@ -792,7 +838,8 @@ table {
   text-align: center;
 }
 
-th, td {
+th,
+td {
   width: 205px;
   padding: 10px;
   border-left: 1px solid;

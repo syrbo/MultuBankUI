@@ -16,7 +16,7 @@
         <!-- Боковая панель -->
         <aside class="sidebar">
             <div class="sidebar-top">
-                <img class="logo-icon" src="media/logo.svg"/>
+                <img class="logo-icon" src="media/logo.svg" />
                 <div class="search-container">
                     <svg class="search-icon" width="18" height="18" viewBox="0 0 18 18" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -145,11 +145,9 @@
                             </div>
                             <div class="table-container" id="tableContainer">
                                 <!-- Таблица операций будет здесь -->
-                                 <div>
-                                    <p class="transactionName">Описание транзы</p>
-                                    <p class="transactionAmount">+500000</p>
-                                    <hr>
-                                 </div>
+                                <div class="transaction-card transaction-card--placeholder">
+                                    <div class="transaction-card__title">Загрузка операций...</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -192,9 +190,11 @@
                         <option value="sbank">SBank</option>
                     </select>
                     <label for="from">откуда</label>
-                    <input type="text" id="from" required size="25" style="width: auto;" placeholder="Счет отправителя"/>
+                    <input type="text" id="from" required size="25" style="width: auto;"
+                        placeholder="Счет отправителя" />
                     <label for="where">куда</label>
-                    <input type="text" id="where" required size="25" style="width: auto" placeholder="Счет получателя" />
+                    <input type="text" id="where" required size="25" style="width: auto"
+                        placeholder="Счет получателя" />
                     <label for="from">сумма</label>
                     <input type="text" id="money" required placeholder="Сумма" />
                     <!-- <label for="bankFilter">на</label>
@@ -208,7 +208,7 @@
                 <div class="contacts-div">
                     <h2 class="section-title">Добавить в контакты</h2>
                     <h2 class="section-title">Быстрые контакты</h2>
-                    
+
                 </div>
                 <div class="contacts-div">
                     <div class="panel-card">
@@ -235,7 +235,8 @@
                         <div class="scenario-form-card">
                             <div class="scenario-form-content">
                                 <span class="scenario-form-text">Если со счета</span>
-                                <input type="text" class="scenario-input" placeholder="Название" id="scenario-from-account-1" />
+                                <input type="text" class="scenario-input" placeholder="Название"
+                                    id="scenario-from-account-1" />
                                 <span class="scenario-form-text">поступила сумма</span>
                                 <select class="scenario-select" id="scenario-condition-1">
                                     <option value=">=" selected>>=</option>
@@ -255,7 +256,8 @@
                         <div class="scenario-form-card">
                             <div class="scenario-form-content">
                                 <span class="scenario-form-text">Если со счета</span>
-                                <input type="text" class="scenario-input" placeholder="Название" id="scenario-from-account-2" />
+                                <input type="text" class="scenario-input" placeholder="Название"
+                                    id="scenario-from-account-2" />
                                 <span class="scenario-form-text">поступила сумма</span>
                                 <select class="scenario-select" id="scenario-condition-2">
                                     <option value=">=" selected>>=</option>
@@ -286,17 +288,35 @@
             <div class="content-section" id="vip-section">
                 <div class="content-section-vip">
                     <h1>Расширьте свой функционал с премиумом</h1>
-                    <h3 class="another-text-vip">Никаких запретов, более понятное отображение информации, всё тот же МультиБанк, который вы так любите</h3>
-                    <svg width="4315" height="142" viewBox="0 0 4315 142" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3756.02 70.6916C3756.02 70.6916 3645.05 -32.1211 3489.51 70.6916C3339.98 173.504 3223 70.6916 3223 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M1624.02 70.6916C1624.02 70.6916 1513.05 -32.1211 1357.51 70.6916C1207.98 173.504 1091 70.6916 1091 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M2690.02 70.6916C2690.02 70.6916 2579.05 -32.1211 2423.51 70.6916C2273.98 173.504 2157 70.6916 2157 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M558.024 70.6916C558.024 70.6916 447.047 -32.1211 291.512 70.6916C141.977 173.504 25.0005 70.6916 25.0005 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M4289.02 70.6916C4289.02 70.6916 4178.05 -32.1211 4022.51 70.6916C3872.98 173.504 3756 70.6916 3756 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M2157.02 70.6916C2157.02 70.6916 2046.05 -32.1211 1890.51 70.6916C1740.98 173.504 1624 70.6916 1624 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M3223.02 70.6916C3223.02 70.6916 3112.05 -32.1211 2956.51 70.6916C2806.98 173.504 2690 70.6916 2690 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        <path d="M1091.02 70.6916C1091.02 70.6916 980.047 -32.1211 824.512 70.6916C674.977 173.504 558 70.6916 558 70.6916" stroke="#FC4E2F" stroke-width="50" stroke-linecap="round"/>
-                        </svg>
+                    <h3 class="another-text-vip">Никаких запретов, более понятное отображение информации, всё тот же
+                        МультиБанк, который вы так любите</h3>
+                    <svg width="4315" height="142" viewBox="0 0 4315 142" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M3756.02 70.6916C3756.02 70.6916 3645.05 -32.1211 3489.51 70.6916C3339.98 173.504 3223 70.6916 3223 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M1624.02 70.6916C1624.02 70.6916 1513.05 -32.1211 1357.51 70.6916C1207.98 173.504 1091 70.6916 1091 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M2690.02 70.6916C2690.02 70.6916 2579.05 -32.1211 2423.51 70.6916C2273.98 173.504 2157 70.6916 2157 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M558.024 70.6916C558.024 70.6916 447.047 -32.1211 291.512 70.6916C141.977 173.504 25.0005 70.6916 25.0005 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M4289.02 70.6916C4289.02 70.6916 4178.05 -32.1211 4022.51 70.6916C3872.98 173.504 3756 70.6916 3756 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M2157.02 70.6916C2157.02 70.6916 2046.05 -32.1211 1890.51 70.6916C1740.98 173.504 1624 70.6916 1624 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M3223.02 70.6916C3223.02 70.6916 3112.05 -32.1211 2956.51 70.6916C2806.98 173.504 2690 70.6916 2690 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                        <path
+                            d="M1091.02 70.6916C1091.02 70.6916 980.047 -32.1211 824.512 70.6916C674.977 173.504 558 70.6916 558 70.6916"
+                            stroke="#FC4E2F" stroke-width="50" stroke-linecap="round" />
+                    </svg>
                     <h1 class="c1-center-after">Что же вам станет доступно?</h1>
                     <table>
                         <tr>
@@ -325,7 +345,8 @@
                             <td>Безлимит</td>
                         </tr>
                     </table>
-                    <button class="scenario-add-button" onclick="purchasePremium()" id="premium_button">Оформить за 300₽/месяц</button>
+                    <button class="scenario-add-button" onclick="purchasePremium()" id="premium_button">Оформить за
+                        300₽/месяц</button>
                 </div>
             </div>
         </main>
