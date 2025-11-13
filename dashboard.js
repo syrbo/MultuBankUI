@@ -365,11 +365,13 @@ window.onload = async function () {
         await auth(localStorage.getItem("uname"), localStorage.getItem("password"))
     }
     USERNAME = localStorage.getItem("uname")
-    try {
-        CONTACTS = JSON.parse(localStorage.getItem("contacts"))
-    } catch (e){
-        CONTACTS = {}
-    }
+    if (localStorage.getItem("contacts") != null) {
+        try {
+            CONTACTS = JSON.parse(localStorage.getItem("contacts"))
+        } catch (e){
+            CONTACTS = {}
+        }
+    } else CONTACTS = {}
     
     parseContacts()
     VBANK_CONSENT_ID = localStorage.getItem("vconsent")
