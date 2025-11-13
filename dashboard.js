@@ -372,7 +372,7 @@ window.onload = async function () {
             CONTACTS = {}
         }
     } else CONTACTS = {}
-    
+
     parseContacts()
     VBANK_CONSENT_ID = localStorage.getItem("vconsent")
     ABANK_CONSENT_ID = localStorage.getItem("aconsent")
@@ -1331,16 +1331,46 @@ function addContact() {
     parseContacts()
     localStorage.setItem("contacts", JSON.stringify(CONTACTS))
     // container.append(btn)
+    document.getElementById("newContactName").value = ""
+    document.getElementById("newContactAcc").value = ""
 }
 
 function parseContacts() {
     console.log("parse")
     let container = document.getElementById("fastContactsContainer")
+    if (!container) return;
+
     container.innerHTML = ""
-    for (const [name, acc] of Object.entries(CONTACTS)) {
-        console.log(name)
-        container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${acc}')">${name} - ${acc}</button><button class="fast-contact-delete" onclick="deleteContact('${name}')">delete</button><br>`
+
+    const entries = Object.entries(CONTACTS)
+    if (entries.length === 0) {
+        const emptyState = document.createElement("div")
+        emptyState.className = "fast-contact-empty"
+        emptyState.textContent = "Добавьте быстрый контакт, чтобы видеть его здесь."
+        container.appendChild(emptyState)
+        return
     }
+
+    entries.forEach(([name, acc]) => {
+        const item = document.createElement("div")
+        item.className = "fast-contact-item"
+
+        const contactButton = document.createElement("button")
+        contactButton.className = "fast-contact"
+        contactButton.type = "button"
+        contactButton.onclick = () => pasteContact(acc)
+        contactButton.textContent = `${name} — ${acc}`
+
+        const deleteButton = document.createElement("button")
+        deleteButton.className = "fast-contact-delete"
+        deleteButton.type = "button"
+        deleteButton.onclick = () => deleteContact(name)
+        deleteButton.textContent = "Удалить"
+
+        item.appendChild(contactButton)
+        item.appendChild(deleteButton)
+        container.appendChild(item)
+    })
 }
 
 function pasteContact(acc) {
