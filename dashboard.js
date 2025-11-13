@@ -366,10 +366,12 @@ window.onload = async function () {
     }
     USERNAME = localStorage.getItem("uname")
     try {
-        CONTANCTS = JSON.parse(localStorage.getItem("contacts"))
+        CONTACTS = JSON.parse(localStorage.getItem("contacts"))
     } catch (e){
-        CONTANCTS = []
+        CONTACTS = {}
     }
+    
+    parseContacts()
     VBANK_CONSENT_ID = localStorage.getItem("vconsent")
     ABANK_CONSENT_ID = localStorage.getItem("aconsent")
     SBANK_CONSENT_ID = localStorage.getItem("sconsent")
@@ -1317,23 +1319,26 @@ async function purchasePremium() {
 }
 
 function addContact() {
-    if (CONTACTS.length >= 3 && !IS_PREMIUM) return alert("Без Premium подписки вы можете добавить только 3 быстрых контакта")
+    if (Object.values(CONTACTS).length >= 3 && !IS_PREMIUM) return alert("Без Premium подписки вы можете добавить только 3 быстрых контакта")
     let name = document.getElementById("newContactName").value.trim()
     let acc = document.getElementById("newContactAcc").value.trim()
     if (name == "" || acc == "") return alert("Заполните все поля")
-    CONTACTS.push({name: name, acc: acc})
-    let container = document.getElementById("fastContactsContainer")
-    container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${acc}')">${name} - ${acc}</button><button class="fast-contact-delete" onclick="deleteContact('${name}')">delete</button><br>`
+    CONTACTS[name] = acc
+    // let container = document.getElementById("fastContactsContainer")
+    // container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${acc}')">${name} - ${acc}</button><button class="fast-contact-delete" onclick="deleteContact('${name}')">delete</button><br>`
+    parseContacts()
     localStorage.setItem("contacts", JSON.stringify(CONTACTS))
     // container.append(btn)
 }
 
 function parseContacts() {
+    console.log("parse")
     let container = document.getElementById("fastContactsContainer")
     container.innerHTML = ""
-    CONTACTS.forEach((elem, i) => {
-        container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${elem.acc}')">${elem.name} - ${elem.acc}</button><button class="fast-contact-delete" onclick="deleteContact('${elem.name}')">delete</button><br>`
-    })
+    for (const [name, acc] of Object.entries(CONTACTS)) {
+        console.log(name)
+        container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${acc}')">${name} - ${acc}</button><button class="fast-contact-delete" onclick="deleteContact('${name}')">delete</button><br>`
+    }
 }
 
 function pasteContact(acc) {
@@ -1341,7 +1346,9 @@ function pasteContact(acc) {
 }
 
 function deleteContact(name) {
+    console.log(name)
     delete CONTACTS[name]
+    console.log(CONTACTS)
     parseContacts()
     localStorage.setItem("contacts", JSON.stringify(CONTACTS))
 }
