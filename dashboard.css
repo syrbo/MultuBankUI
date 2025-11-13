@@ -1,5 +1,5 @@
 :root {
-  --primary-red: #fc4e2f;
+  --primary-red: #FC4E2F;
   --sidebar-bg: #ffffff;
   --main-bg: #f8f8f8;
   --text-primary: #1c1b1f;
@@ -34,7 +34,7 @@ body {
 .sidebar {
   width: 240px;
   height: 100vh;
-  position: fixed;
+  position:fixed;
   background: var(--main-bg);
   display: flex;
   flex-direction: column;
@@ -1023,4 +1023,34 @@ table {
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
+}
+
+.fast-contact {
+  background: #fff;
+  border: 2px solid #dadada;
+  border-radius: 8px;
+  padding: 10px 24px;
+  color: black;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  width: 90%;
+  margin: 4px 0 4px 0;
+}
+
+.fast-contact-delete {
+  background: #fff;
+  border: 2px solid #dadada;
+  border-radius: 8px;
+  padding: 10px 24px;
+  color: black;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  width: 10%;
+  margin: 4px 0 4px 0;
 }

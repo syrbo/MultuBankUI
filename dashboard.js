@@ -365,6 +365,11 @@ window.onload = async function () {
         await auth(localStorage.getItem("uname"), localStorage.getItem("password"))
     }
     USERNAME = localStorage.getItem("uname")
+    try {
+        CONTANCTS = JSON.parse(localStorage.getItem("contacts"))
+    } catch (e){
+        CONTANCTS = []
+    }
     VBANK_CONSENT_ID = localStorage.getItem("vconsent")
     ABANK_CONSENT_ID = localStorage.getItem("aconsent")
     SBANK_CONSENT_ID = localStorage.getItem("sconsent")
@@ -381,6 +386,7 @@ window.onload = async function () {
         document.getElementById("premium_button").className = "premium-activated"
         document.getElementById("premium_button").innerHTML = "Оформлено!"
     }
+    document.getElementById("account-text").innerHTML = USERNAME
     let check = await doHTTP(SBANK + "account-consents/" + SBANK_CONSENT_ID, { "Authorization": STOKEN, "X-Requesting-Bank": "team211" }, null, {})
     if ("detail" in check) {
         localStorage.removeItem("sconsent")
@@ -876,68 +882,35 @@ async function getTransactions() {
 }
 
 function fillTransactionTable(allTransactions) {
-    allTransactions.sort((a, b) => new Date(b.bookingDateTime) - new Date(a.bookingDateTime));
-    const container = document.getElementById("tableContainer");
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    allTransactions.forEach((transaction) => {
-        const bankKey = transaction.bank?.toLowerCase();
-        const accountsByBank = bankKey ? ACCOUNTS[bankKey]?.accounts : null;
-        const accountDetails = accountsByBank ? accountsByBank[transaction.accountId] : null;
-
-        const accountNumber = accountDetails?.accId || accountDetails?.acc || transaction.accountId || "—";
-        const bankName = transaction.bank || "Банк";
-        const description = transaction.transactionInformation || "Операция";
-        const amountRaw = parseFloat(transaction.amount?.amount ?? "0");
-        const typeCode = transaction.bankTransactionCode?.code || "";
-        const isIncome = typeCode === "02" || amountRaw >= 0;
-        const amountValue = Math.abs(amountRaw);
-        const formattedAmount = amountValue.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const displayDate = formatISOToDateTime(transaction.bookingDateTime);
-
-        const card = document.createElement("div");
-        card.className = "transaction-card";
-
-        const header = document.createElement("div");
-        header.className = "transaction-card__header";
-
-        const title = document.createElement("div");
-        title.className = "transaction-card__title";
-        title.textContent = description;
-
-        const amount = document.createElement("div");
-        amount.className = `transaction-card__amount ${isIncome ? "income" : "expense"}`;
-        amount.textContent = `${isIncome ? "+" : "-"}${formattedAmount} ₽`;
-
-        header.appendChild(title);
-        header.appendChild(amount);
-
-        const meta = document.createElement("div");
-        meta.className = "transaction-card__meta";
-
-        const bankMeta = document.createElement("div");
-        bankMeta.className = "transaction-card__meta-item";
-        bankMeta.innerHTML = `<span>Банк:</span><span>${bankName}</span>`;
-
-        const accountMeta = document.createElement("div");
-        accountMeta.className = "transaction-card__meta-item";
-        accountMeta.innerHTML = `<span>Счет:</span><span>${accountNumber}</span>`;
-
-        const dateMeta = document.createElement("div");
-        dateMeta.className = "transaction-card__meta-item";
-        dateMeta.innerHTML = `<span>Дата:</span><span>${displayDate}</span>`;
-
-        meta.appendChild(bankMeta);
-        meta.appendChild(accountMeta);
-        meta.appendChild(dateMeta);
-
-        card.appendChild(header);
-        card.appendChild(meta);
-
-        container.appendChild(card);
-    });
+    allTransactions.sort((a, b) => new Date(b.bookingDateTime).getTime().toString().localeCompare(new Date(a.bookingDateTime).getTime().toString()))
+    let container = document.getElementById("tableContainer")
+    container.innerHTML = ""
+    allTransactions.forEach((elem, i) => {
+        let type = elem.bankTransactionCode.code
+        let info = elem.transactionInformation
+        console.log(ACCOUNTS[elem.bank.toLowerCase()])
+        let accInfo = elem.bank + " " + ACCOUNTS[elem.bank.toLowerCase()]["accounts"][elem.accountId].accId + " | "
+        let item = document.createElement("div")
+        let p1 = document.createElement('p')
+        p1.className = "transactionName"
+        p1.innerHTML = accInfo + info + " "
+        let p2 = document.createElement('p')
+        p2.className = "transactionAmount"
+        p2.innerHTML = elem.amount.amount + " руб."
+        // if (type == "02") {
+        //     p2.innerHTML = "+" + elem.amount.amount
+        // } else {
+        //     p2.innerHTML = "-" + elem.amount.amount
+        // }
+        let p3 = document.createElement("p")
+        p3.className = "transactionName"
+        p3.innerHTML = " " + formatISOToDateTime(elem.bookingDateTime)
+        item.appendChild(p1)
+        item.appendChild(p2)
+        item.appendChild(p3)
+        item.appendChild(document.createElement("hr"))
+        container.appendChild(item)
+    })
 }
 
 // Функция инициализации диаграмм истории
@@ -1341,4 +1314,34 @@ async function purchasePremium() {
         document.getElementById("premium_button").innerHTML = "Оформлено!"
         return alert("Подписка успешно оформлена!")
     }
+}
+
+function addContact() {
+    if (CONTACTS.length >= 3 && !IS_PREMIUM) return alert("Без Premium подписки вы можете добавить только 3 быстрых контакта")
+    let name = document.getElementById("newContactName").value.trim()
+    let acc = document.getElementById("newContactAcc").value.trim()
+    if (name == "" || acc == "") return alert("Заполните все поля")
+    CONTACTS.push({name: name, acc: acc})
+    let container = document.getElementById("fastContactsContainer")
+    container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${acc}')">${name} - ${acc}</button><button class="fast-contact-delete" onclick="deleteContact('${name}')">delete</button><br>`
+    localStorage.setItem("contacts", JSON.stringify(CONTACTS))
+    // container.append(btn)
+}
+
+function parseContacts() {
+    let container = document.getElementById("fastContactsContainer")
+    container.innerHTML = ""
+    CONTACTS.forEach((elem, i) => {
+        container.innerHTML += `<button class="fast-contact" onclick="pasteContact('${elem.acc}')">${elem.name} - ${elem.acc}</button><button class="fast-contact-delete" onclick="deleteContact('${elem.name}')">delete</button><br>`
+    })
+}
+
+function pasteContact(acc) {
+    document.getElementById("where").value = acc
+}
+
+function deleteContact(name) {
+    delete CONTACTS[name]
+    parseContacts()
+    localStorage.setItem("contacts", JSON.stringify(CONTACTS))
 }

@@ -14,6 +14,7 @@ let SBANK_PCONSENT_ID = ""
 let USERNAME = ""
 let IS_PREMIUM = false
 let SCENARIOS = [];
+let CONTACTS = [];
 
 let ACCOUNTS = {
     "vbank": {total_balance: 0, accounts: {}},
@@ -36,7 +37,7 @@ async function sleep(ms) {
 }
 
 async function doHTTP(url, headers = {}, body = null, params = {}) {
-    await sleep(250)
+    await sleep(150)
     const hasParams = params && Object.keys(params).length > 0
     if (hasParams) {
         const query = new URLSearchParams(params).toString()
