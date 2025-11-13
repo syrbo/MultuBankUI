@@ -411,10 +411,10 @@ window.onload = async function () {
     document.getElementById("greeting").innerHTML = "Добрый день, " + USERNAME
     await getProductConsents()
     
-    await updateAccountsAndTransactions()
+    await updateAccountsAndTransactions(true)
     console.log(ACCOUNTS)
 
-    setInterval(await updateAccountsAndTransactions, 30000)
+    setInterval(await updateAccountsAndTransactions, 10000, false)
 
     // Отрисовываем счета
     renderAccounts()
@@ -443,13 +443,20 @@ window.onload = async function () {
     loadScenarios();
 }
 
-async function updateAccountsAndTransactions() {
+async function updateAccountsAndTransactions(firstTime) {
     console.log("update")
     await getAccounts()
     renderAccounts()
     await getTransactions()
     let allTransactions = [...TRANSACTIONS['vbank'], ...TRANSACTIONS['abank'], ...TRANSACTIONS['sbank']]
     fillTransactionTable(allTransactions)
+    // if (!firstTime) {
+    //     let newTrans = getArrayDifference(allTransactions, OLD_TRANSACTIONS)
+    //     doScenarios(newTrans.inFirstNotSecond)
+    // } else {
+    //     OLD_TRANSACTIONS = allTransactions
+    // }
+    OLD_TRANSACTIONS = allTransactions
     const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
     document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
 }
@@ -499,6 +506,7 @@ function renderAccounts() {
                 </div>
                 <div class="account-balance-label">Баланс</div>
                 <div class="account-balance">${account.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</div>
+                <button class="scenario-add-button">Закрыть счёт</button>
             </div>
         `
         accountsContainer.appendChild(accountDiv)
@@ -1194,7 +1202,7 @@ async function makeTransaction() {
         // await getTransactions();
         // const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
         // document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
-        await updateAccountsAndTransactions()
+        await updateAccountsAndTransactions(false)
         return alert("✅ Средства успешно переведены!")
     }
 }
@@ -1232,7 +1240,8 @@ function addScenario(formNumber) {
         fromAccount: fromAccount,
         condition: condition,
         amount: amount,
-        toAccount: toAccount
+        toAccount: toAccount,
+        type: formNumber
     };
 
     SCENARIOS.push(scenario);
@@ -1275,6 +1284,17 @@ function renderScenarios() {
 
         container.appendChild(scenarioItem);
     });
+}
+
+function doScenarios(newTrans) {
+    console.log("doScenarios")
+    console.log(newTrans)
+    newTrans.forEach((transaction, i) => {
+        const amountRaw = parseFloat(transaction.amount?.amount ?? "0");
+        const typeCode = transaction.bankTransactionCode?.code || "";
+        const isIncome = typeCode === "02" || amountRaw >= 0;
+        if (!isIncome) return
+    })
 }
 
 window.addScenario = addScenario;
@@ -1338,7 +1358,7 @@ async function purchasePremium() {
     if (payment["data"]["status"] == "AcceptedSettlementCompleted") {
         IS_PREMIUM = "1"
         localStorage.setItem("premium", IS_PREMIUM)
-        await updateAccountsAndTransactions()
+        await updateAccountsAndTransactions(false)
         // await getAccounts()
         // renderAccounts();
         // await getTransactions();
