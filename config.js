@@ -31,6 +31,7 @@ let TRANSACTIONS = {
     "abank": [],
     "sbank": []
 }
+let OLD_TRANSACTIONS = []
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -77,4 +78,44 @@ async function doHTTP(url, headers = {}, body = null, params = {}) {
         return await response.json()
     }
     return await response.text()
+}
+
+function deepEqual(obj1, obj2) {
+  // Check if they are the same reference or if both are null/undefined
+  if (obj1 === obj2) {
+    return true;
+  }
+
+  // Check if they are not objects or if one is null/undefined
+  if (typeof obj1 !== 'object' || obj1 === null ||
+      typeof obj2 !== 'object' || obj2 === null) {
+    return false;
+  }
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  // Check if they have the same number of keys
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  // Iterate through keys and recursively compare values
+  for (const key of keys1) {
+    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getArrayDifference(arr1, arr2) {
+    const set2 = new Set(arr2);
+    const set1 = new Set(arr1);
+    
+    return {
+        inFirstNotSecond: arr1.filter(item => !set2.has(item)),
+        inSecondNotFirst: arr2.filter(item => !set1.has(item))
+    };
 }
