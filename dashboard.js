@@ -300,14 +300,14 @@ async function getPaymentConsent(bankApi, authToken, amount, account, comment) {
 }
 
 async function getAccounts() {
-    ACCOUNTS['sbank']['total_balance'] = 0
-    ACCOUNTS['vbank']['total_balance'] = 0
-    ACCOUNTS['abank']['total_balance'] = 0
+    ACCOUNTS['sbank']['total_balance'] = -1
+    ACCOUNTS['vbank']['total_balance'] = -1
+    ACCOUNTS['abank']['total_balance'] = -1
     let vaccounts = await doHTTP(VBANK + "accounts", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
     let aaccounts = await doHTTP(ABANK + "accounts", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID }, null, { "client_id": USERNAME })
     if (SBANK_CONSENT_ID.search("consent") != -1) {
         let saccounts = await doHTTP(SBANK + "accounts", { "Authorization": STOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": SBANK_CONSENT_ID }, null, { "client_id": USERNAME })
-        if (!("detail" in saccounts)) {
+        if (!("detail" in saccounts) && !("NetworkError" in saccounts)) {
             saccounts = saccounts["data"]["account"]
             const sbankPromises = saccounts.map(async (acc) => {
                 let balance = await doHTTP(SBANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": STOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": SBANK_CONSENT_ID }, null, { "client_id": USERNAME })
@@ -320,7 +320,7 @@ async function getAccounts() {
             await Promise.all(sbankPromises)
         }
     }
-    if (!("detail" in vaccounts)) {
+    if (!("detail" in vaccounts) && !("NetworkError" in vaccounts)) {
         vaccounts = vaccounts["data"]["account"]
         const vbankPromises = vaccounts.map(async (acc) => {
             let balance = await doHTTP(VBANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": VTOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": VBANK_CONSENT_ID }, null, { "client_id": USERNAME })
@@ -331,7 +331,7 @@ async function getAccounts() {
         })
         await Promise.all(vbankPromises)
     }
-    if (!("detail" in aaccounts)) {
+    if (!("detail" in aaccounts) && !("NetworkError" in aaccounts)) {
         aaccounts = aaccounts["data"]["account"]
         const abankPromises = aaccounts.map(async (acc) => {
             let balance = await doHTTP(ABANK + "accounts/" + acc["accountId"] + "/balances", { "Authorization": ATOKEN, "X-Requesting-Bank": "team211", "X-Consent-Id": ABANK_CONSENT_ID }, null, { "client_id": USERNAME })
@@ -358,6 +358,31 @@ function logout() {
 }
 
 window.onload = async function () {
+    if (localStorage.getItem("snapshot") != null) {
+        try {
+            SNAPSHOT = JSON.parse(localStorage.getItem("snapshot"))
+        } catch (e) {
+            SNAPSHOT = {
+                balance: -1,
+                accounts: -1,
+                products: -1,
+                transactions: -1
+            }
+        }
+    }
+    console.log(SNAPSHOT)
+    if (SNAPSHOT.balance != -1) {
+        document.getElementById("totalBalance").textContent = SNAPSHOT.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+    }
+    if (SNAPSHOT.accounts != -1) {
+        document.getElementById("totalAccounts").textContent = SNAPSHOT.accounts.toString()
+    }
+    if (SNAPSHOT.products != -1) {
+        document.getElementById("totalProducts").textContent = SNAPSHOT.products.toString()
+    }
+    if (SNAPSHOT.transactions != -1) {
+        document.getElementById("totalTransactions").textContent = SNAPSHOT.transactions.toString()
+    }
     if (localStorage.getItem("uname") == null || localStorage.getItem("password") == null) {
         return window.location.href = "/index.html"
     }
@@ -447,18 +472,41 @@ async function updateAccountsAndTransactions(firstTime) {
     console.log("update")
     await getAccounts()
     renderAccounts()
-    await getTransactions()
-    let allTransactions = [...TRANSACTIONS['vbank'], ...TRANSACTIONS['abank'], ...TRANSACTIONS['sbank']]
-    fillTransactionTable(allTransactions)
-    // if (!firstTime) {
-    //     let newTrans = getArrayDifference(allTransactions, OLD_TRANSACTIONS)
-    //     doScenarios(newTrans.inFirstNotSecond)
-    // } else {
-    //     OLD_TRANSACTIONS = allTransactions
-    // }
-    OLD_TRANSACTIONS = allTransactions
     const totalBalance = ACCOUNTS['abank']['total_balance'] + ACCOUNTS['vbank']['total_balance'] + ACCOUNTS['sbank']['total_balance']
-    document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+    if (totalBalance != -3) {
+        SNAPSHOT.balance = totalBalance
+        SNAPSHOT.accounts = Object.values(ACCOUNTS['vbank']['accounts']).length + Object.values(ACCOUNTS['abank']['accounts']).length + Object.values(ACCOUNTS['sbank']['accounts']).length
+        document.getElementById("totalBalance").textContent = totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₽'
+        document.getElementById("offline-balance").style.display = "none"
+        document.getElementById('totalAccounts').textContent = SNAPSHOT.accounts.toString()
+        document.getElementById('offline-accounts').style.display = "none"
+    }
+    else {
+        document.getElementById("totalBalance").textContent = SNAPSHOT.balance
+        document.getElementById("offline-balance").style.display = "block"
+        document.getElementById("totalAccounts").textContent = SNAPSHOT.accounts
+        document.getElementById("offline-accounts").style.display = "block"
+    }
+    await getTransactions()
+    console.log(ALL_TRANSACTIONS.length)
+    if (TRANSACTIONS_RUINED == 3) {
+        document.getElementById("totalTransactions").textContent = SNAPSHOT.transactions
+        document.getElementById("offline-transactions").style.display = "block"
+    } else {
+        SNAPSHOT.transactions = ALL_TRANSACTIONS.length
+        document.getElementById("totalTransactions").textContent = ALL_TRANSACTIONS.length.toString()
+        document.getElementById("offline-transactions").style.display = "none"
+    }
+    fillTransactionTable()
+    // if (!firstTime) {
+        //     let newTrans = getArrayDifference(ALL_TRANSACTIONS, OLD_TRANSACTIONS)
+        //     doScenarios(newTrans.inFirstNotSecond)
+        // } else {
+            //     OLD_TRANSACTIONS = ALL_TRANSACTIONS
+            // }
+    OLD_TRANSACTIONS = ALL_TRANSACTIONS
+    localStorage.setItem("snapshot", JSON.stringify(SNAPSHOT))
+    
 }
 
 // Функция для отрисовки счетов
@@ -597,21 +645,43 @@ function renderAccounts() {
 }
 
 async function getProducts() {
+    let ruined = false
+    let count = 0
     if (VBANK_PCONSENT_ID != null && VBANK_PCONSENT_ID != "") {
         let products = await doHTTP(VBANK + "product-agreements", { "Authorization": VTOKEN, "X-Product-Agreement-Consent-Id": VBANK_PCONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "client_id": USERNAME })
-        PRODUCTS['vbank'].push(...products['data'])
+        if ("NetworkError" in products) ruined = true
+        else {
+            PRODUCTS['vbank'].push(...products['data'])
+            count += PRODUCTS['vbank'].length
+        }
     }
     if (ABANK_PCONSENT_ID != null && ABANK_PCONSENT_ID != "") {
         let products = await doHTTP(ABANK + "product-agreements", { "Authorization": ATOKEN, "X-Product-Agreement-Consent-Id": ABANK_PCONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "client_id": USERNAME })
-        PRODUCTS['abank'].push(...products['data'])
+        if ("NetworkError" in products) ruined = true
+        else {
+            PRODUCTS['abank'].push(...products['data'])
+            count += PRODUCTS['abank'].length
+        }
     }
     if (SBANK_CONSENT_ID.search("consent") != -1) {
         if (SBANK_PCONSENT_ID != null && SBANK_PCONSENT_ID != "") {
             let products = await doHTTP(SBANK + "product-agreements", { "Authorization": STOKEN, "X-Product-Agreement-Consent-Id": SBANK_PCONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "client_id": USERNAME })
-            PRODUCTS['sbank'].push(...products['data'])
+            if ("NetworkError" in products) ruined = true
+            else {
+                PRODUCTS['sbank'].push(...products['data'])
+                count += PRODUCTS['sbank'].length
+            }
         }
     }
-
+    if (ruined) {
+        document.getElementById("offline-products").style.display = "block"
+        document.getElementById("totalProducts").textContent = SNAPSHOT.products.toString()
+    } else {
+        SNAPSHOT.products = count
+        document.getElementById("offline-products").style.display = "none"
+        document.getElementById("totalProducts").textContent = SNAPSHOT.products.toString()
+    }
+    localStorage.setItem("snapshot", JSON.stringify(SNAPSHOT))
 }
 
 // Функция для отрисовки продуктов
@@ -820,12 +890,17 @@ function formatISOToDateTime(isoString) {
 }
 
 async function getTransactions() {
-    Object.values(ACCOUNTS['vbank']['accounts']).forEach(async (elem, index) => {
+    TRANSACTIONS_RUINED = 0
+    for (let elem of Object.values(ACCOUNTS['vbank']['accounts'])) {
         let a = []
         if (IS_PREMIUM) {
             let i = 1;
             while (true) {
                 a = await doHTTP(VBANK + "accounts/" + elem['acc'] + "/transactions", { "Authorization": VTOKEN, "X-Consent-Id": VBANK_CONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "limit": 100, "page": i })
+                if ("NetworkError" in a) {
+                    TRANSACTIONS_RUINED++
+                    break
+                }
                 a = a.data.transaction
                 if (a.length == 0) break
                 a = a.map(function (elem) {
@@ -833,24 +908,33 @@ async function getTransactions() {
                     return elem
                 })
                 TRANSACTIONS['vbank'].push(...a)
+                ALL_TRANSACTIONS.push(...a)
                 i++
             }
         } else {
             a = await doHTTP(VBANK + "accounts/" + elem['acc'] + "/transactions", { "Authorization": VTOKEN, "X-Consent-Id": VBANK_CONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "limit": 15 })
+            if ("NetworkError" in a) {
+                TRANSACTIONS_RUINED++
+            }
             a = a.data.transaction
             a = a.map(function (elem) {
                 elem["bank"] = "VBank"
                 return elem
             })
             TRANSACTIONS['vbank'].push(...a)
+            ALL_TRANSACTIONS.push(...a)
         }
-    })
-    Object.values(ACCOUNTS['abank']['accounts']).forEach(async (elem, index) => {
+    }
+    for (let elem of Object.values(ACCOUNTS['abank']['accounts'])) {
         let a = []
         if (IS_PREMIUM) {
             let i = 1;
             while (true) {
                 a = await doHTTP(ABANK + "accounts/" + elem['acc'] + "/transactions", { "Authorization": ATOKEN, "X-Consent-Id": ABANK_CONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "limit": 100, "page": i })
+                if ("NetworkError" in a) {
+                    TRANSACTIONS_RUINED++
+                    break
+                }
                 a = a.data.transaction
                 if (a.length == 0) break
                 a = a.map(function (elem) {
@@ -858,26 +942,34 @@ async function getTransactions() {
                     return elem
                 })
                 TRANSACTIONS['abank'].push(...a)
+                ALL_TRANSACTIONS.push(...a)
                 i++
             }
         } else {
             a = await doHTTP(ABANK + "accounts/" + elem['acc'] + "/transactions", { "Authorization": ATOKEN, "X-Consent-Id": ABANK_CONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "limit": 15 })
+            if ("NetworkError" in a) {
+                TRANSACTIONS_RUINED++
+            }
             a = a.data.transaction
             a = a.map(function (elem) {
                 elem["bank"] = "ABank"
                 return elem
             })
             TRANSACTIONS['abank'].push(...a)
-
+            ALL_TRANSACTIONS.push(...a)
         }
-    })
+    }
     if (SBANK_CONSENT_ID.search("consent") != -1) {
-        Object.values(ACCOUNTS['sbank']['accounts']).forEach(async (elem, index) => {
+        for (let elem of Object.values(ACCOUNTS['sbank']['accounts'])) {
             let a = []
             if (IS_PREMIUM) {
                 let i = 1;
                 while (true) {
                     a = await doHTTP(SBANK + "accounts/" + elem['acc'] + "/transactions", { "Authorization": STOKEN, "X-Consent-Id": SBANK_CONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "limit": 100, "page": i })
+                    if ("NetworkError" in a) {
+                        TRANSACTIONS_RUINED++
+                        break
+                    }
                     a = a.data.transaction
                     if (a.length == 0) break
                     a = a.map(function (elem) {
@@ -885,22 +977,29 @@ async function getTransactions() {
                         return elem
                     })
                     TRANSACTIONS['sbank'].push(...a)
+                    ALL_TRANSACTIONS.push(...a)
                     i++
                 }
             } else {
                 a = await doHTTP(SBANK + "accounts/" + elem['acc'] + "/transactions", { "Authorization": STOKEN, "X-Consent-Id": SBANK_CONSENT_ID, "X-Requesting-Bank": "team211" }, null, { "limit": 15 })
+                if ("NetworkError" in a) {
+                    TRANSACTIONS_RUINED++
+                }
                 a = a.data.transaction
                 a = a.map(function (elem) {
                     elem["bank"] = "SBank"
                     return elem
                 })
                 TRANSACTIONS['sbank'].push(...a)
+                ALL_TRANSACTIONS.push(...a)
             }
-        })
+        }
     }
+    console.log("here")
 }
 
-function fillTransactionTable(allTransactions) {
+function fillTransactionTable() {
+    let allTransactions = ALL_TRANSACTIONS
     allTransactions.sort((a, b) => new Date(b.bookingDateTime) - new Date(a.bookingDateTime));
 
 
@@ -1089,12 +1188,12 @@ function fillTransactionTable(allTransactions) {
 
 // Функция инициализации диаграмм истории
 async function initializeHistoryCharts() {
-    let allTransactions = [...TRANSACTIONS['vbank'], ...TRANSACTIONS['abank'], ...TRANSACTIONS['sbank']]
-    fillTransactionTable(allTransactions)
-    console.log(allTransactions)
+    ALL_TRANSACTIONS = [...TRANSACTIONS['vbank'], ...TRANSACTIONS['abank'], ...TRANSACTIONS['sbank']]
+    fillTransactionTable()
+    console.log(ALL_TRANSACTIONS)
     let incomes = {}
     let expenses = {}
-    allTransactions.forEach((elem, i) => {
+    ALL_TRANSACTIONS.forEach((elem, i) => {
         let type = elem.bankTransactionCode.code
         let info = elem.transactionInformation
         if (info.search("Перевод") != -1) info = "Переводы"
