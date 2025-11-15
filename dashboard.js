@@ -1539,3 +1539,32 @@ function deleteContact(name) {
     parseContacts()
     localStorage.setItem("contacts", JSON.stringify(CONTACTS))
 }
+
+/* ТЕМНАЯ ТЕМА */
+
+// Переключение темы
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('.nav-icon-mask');
+
+// Проверяем сохраненную тему
+if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.querySelector('.nav-text').textContent = 'Светлая тема';
+    themeIcon.style.setProperty('--icon-url', "url('media/sun.svg')");
+}
+
+themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    
+    if (currentTheme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        themeToggle.querySelector('.nav-text').textContent = 'Тёмная тема';
+        themeIcon.style.setProperty('--icon-url', "url('media/moon.svg')");
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        themeToggle.querySelector('.nav-text').textContent = 'Светлая тема';
+        themeIcon.style.setProperty('--icon-url', "url('media/sun.svg')");
+    }
+});
