@@ -414,7 +414,7 @@ window.onload = async function () {
     await updateAccountsAndTransactions(true)
     console.log(ACCOUNTS)
 
-    setInterval(await updateAccountsAndTransactions, 10000, false)
+    //setInterval(await updateAccountsAndTransactions, 10000, false)
 
     // Отрисовываем счета
     renderAccounts()
